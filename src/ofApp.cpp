@@ -11,12 +11,12 @@ void ofApp::setup(){
     serial.listDevices();
     vector <ofSerialDeviceInfo> deviceList = serial.getDeviceList();
     
-    int baud = 9600;
+    int baud = 115200;
         
     #ifdef __arm__
-    serial.setup("/dev/ttyACM0", baud); //open the first device
+        serial.setup("/dev/ttyACM0", baud); //open the first device
     #else 
-    serial.setup("/dev/tty.usbmodem1216041", baud); //open the first device
+        serial.setup("/dev/tty.usbmodem1216041", baud); //open the first device
     #endif
 
 
@@ -52,19 +52,14 @@ void ofApp::update(){
         
         // Indicate DATA is coming
         serial.writeByte('$');
-   
-        
-        for(int i = 0; i < 10; i++){
-            for(int j=0; j < 10;j++){
-                
+        for(int i = 0; i < 1; i++){
+            for(int j=0; j < 4;j++){
                     // push out the acutal data, r g b pixel per pixel
                     serial.writeByte(pixelMatrix[i][j].r);
                     serial.writeByte(pixelMatrix[i][j].g);
                     serial.writeByte(pixelMatrix[i][j].b);
-               
             }
         }
-        
         
 //        unsigned char cmd[] = {'@','X'};
 //        serial.writeBytes(&cmd[0],2);
