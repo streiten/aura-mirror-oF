@@ -1,32 +1,39 @@
 #pragma once
 
 #include "ofMain.h"
+#include "ConsoleListener.h"
 
-class ofApp : public ofBaseApp{
+#ifdef __arm__
+    #include "ofxCvPiCam.h"
+#endif
 
-	public:
-		void setup();
-		void update();
-		void draw();
 
-		void keyPressed(int key);
-		void keyReleased(int key);
-		void mouseMoved(int x, int y );
-		void mouseDragged(int x, int y, int button);
-		void mousePressed(int x, int y, int button);
-		void mouseReleased(int x, int y, int button);
-		void windowResized(int w, int h);
-		void dragEvent(ofDragInfo dragInfo);
-		void gotMessage(ofMessage msg);
+
+class ofApp : public ofBaseApp , public SSHKeyListener{
     
-        void drawMatrix();
-        ofColor pixelMatrix[10][10];
-        ofColor pixelStrip[200];
+public:
+    void setup();
+    void update();
+    void draw();
     
-        void generateStripData();
+    void keyPressed(int key);
+    void keyReleased(int key);
+    void mouseMoved(int x, int y );
+    void mouseDragged(int x, int y, int button);
+    void mousePressed(int x, int y, int button);
+    void mouseReleased(int x, int y, int button);
+    void windowResized(int w, int h);
+    void dragEvent(ofDragInfo dragInfo);
+    void gotMessage(ofMessage msg);
     
-        bool debug;
-        int matrixStyle;
+    void drawMatrix();
+    ofColor pixelMatrix[10][10];
+    ofColor pixelStrip[200];
+    
+    void generateStripData();
+    
+    bool debug;
+    int matrixStyle;
     
     bool		bSendSerialMessage;			// a flag for sending serial
     char		bytesRead[255];				// data from serial, we will be trying to read 255
@@ -37,6 +44,15 @@ class ofApp : public ofBaseApp{
     ofSerial	serial;
     
     ofImage img;
+    
+    int thresh;
+    
+#ifdef __arm__
+    ofxCvPiCam cam;
+#endif
+    
+    ConsoleListener consoleListener;
+    void onCharacterReceived(SSHKeyListenerEventData& e);
 
     
 };

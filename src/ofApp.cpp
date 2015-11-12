@@ -2,34 +2,48 @@
 
 //--------------------------------------------------------------
 void ofApp::setup(){
-    ofBackground(0, 0, 0);
+
     debug = true;
     
-    ofSetVerticalSync(false);
+    // Serial
     bSendSerialMessage = false;
-    
     serial.listDevices();
     vector <ofSerialDeviceInfo> deviceList = serial.getDeviceList();
-    
     int baud = 115200;
-        
     #ifdef __arm__
         serial.setup("/dev/ttyACM0", baud); //open the first device
     #else 
         serial.setup("/dev/tty.usbmodem1216041", baud); //open the first device
     #endif
-
-
     memset(bytesReadString, 0, 256);
 
+    // General
+    ofBackground(0, 0, 0);
+    ofSetVerticalSync(false);
     ofSetFrameRate(30);
+    
+    consoleListener.setup(this);
+    consoleListener.startThread(false, false);
+    
     // img.allocate(10, 10, OF_IMAGE_COLOR);
+    #ifdef __arm__
+        cam.setup(320,240,false);//setup camera (w,h,color = true,gray = false);
+    #endif
+
+    thresh = 127;
+
+    
 
 }
+
 
 //--------------------------------------------------------------
 void ofApp::update(){
     
+    #ifdef __arm__
+        frame = cam.grab();
+    #endif
+
     // Fill the Matrix with sample Color
     float hue = fmodf(ofGetElapsedTimef()*100,255);
     // float brightness = ofMap(mouseX, 0, 800, 0, 255);
@@ -91,11 +105,20 @@ void ofApp::update(){
 //--------------------------------------------------------------
 void ofApp::draw(){
     
-    drawMatrix();
+    #ifdef __arm__
+    if(!frame.empty()) {
+        threshold(frame,frameProcessed,thresh,255,0);
+        drawMat(frame,0,0);
+        drawMat(frameProcessed,320,0);
+    }
+    #endif
+
+    
+    // drawMatrix();
     // Draw the raw strip on the very top for debug
     for (int i = 0; i<190; i++) {
         ofSetColor(pixelStrip[i]);
-        ofRect(i*4, 0, 4, 4);
+        // ofRectangle(i*4, 0, 4, 4);
     }
     // img.draw(0, 0,100,100);
 }
@@ -156,18 +179,26 @@ void ofApp::drawMatrix() {
                 ofDrawBitmapString(ofToString(k),x,y);
             }
             
-            ofRect(x,y,20,20);
+            ofRectangle(x,y,20,20);
             
         }
     }
     
 }
 
+void ofApp::onCharacterReceived(SSHKeyListenerEventData& e)
+{
+    keyPressed((int)e.character);
+}
+
 
 
 //--------------------------------------------------------------
 void ofApp::keyPressed(int key){
-    
+//    ofLogVerbose() << "keyPressed: " << key;
+//    if(key == 't' && thresh > 0)   thresh--;
+//    if(key == 'T' && thresh < 255) thresh++;
+//    cout << "Keypressed:" << key << endl;
 }
 
 //--------------------------------------------------------------
