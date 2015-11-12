@@ -5,7 +5,7 @@ void ofApp::setup(){
     ofBackground(0, 0, 0);
     debug = true;
     
-    ofSetVerticalSync(true);
+    ofSetVerticalSync(false);
     bSendSerialMessage = false;
     
     serial.listDevices();
@@ -23,7 +23,7 @@ void ofApp::setup(){
     memset(bytesReadString, 0, 256);
 
     ofSetFrameRate(30);
-    img.allocate(10, 10, OF_IMAGE_COLOR);
+    // img.allocate(10, 10, OF_IMAGE_COLOR);
 
 }
 
@@ -32,39 +32,39 @@ void ofApp::update(){
     
     // Fill the Matrix with sample Color
     float hue = fmodf(ofGetElapsedTimef()*100,255);
-    float brightness = ofMap(mouseX, 0, 800, 0, 255);
+    // float brightness = ofMap(mouseX, 0, 800, 0, 255);
     // cout << brightness << endl;
-    
+    unsigned char serialOutBuffer[301];
+    serialOutBuffer[0] = '$';
+    int p = 0;
+
     for(int i = 0; i < 10; i++){
         for(int j=0; j < 10;j++){
             pixelMatrix[i][j].setHsb( hue, ofMap(i, 0, 10, 0, 255), ofMap(j, 10, 0, 0, 128 ) );
-            
-            img.getPixelsRef().setColor(i, j, pixelMatrix[i][j]);
+        // Indicate DATA is coming
+
+                // push out the acutal data, r g b pixel per pixel
+                serialOutBuffer[3*p+1] = pixelMatrix[i][j].r;
+                serialOutBuffer[3*p+2] = pixelMatrix[i][j].g;
+                serialOutBuffer[3*p+3] = pixelMatrix[i][j].b;
+                p++;
+
+       //   img.getPixelsRef().setColor(i, j, pixelMatrix[i][j]);
             
         }
     }
-    
-    img.update();
+
+    serial.writeBytes(&serialOutBuffer[0],301);
+
+   // img.update();
     
     generateStripData();
 
     if (bSendSerialMessage){
-        
-        // Indicate DATA is coming
-        serial.writeByte('$');
-        for(int i = 0; i < 10; i++){
-            for(int j=0; j < 10;j++){
-                    // push out the acutal data, r g b pixel per pixel
-                    serial.writeByte(pixelMatrix[i][j].r);
-                    serial.writeByte(pixelMatrix[i][j].g);
-                    serial.writeByte(pixelMatrix[i][j].b);
-            }
-        }
-        
-//        unsigned char cmd[] = {'@','X'};
-//        serial.writeBytes(&cmd[0],2);
-//        cout << "Display toggle CMD sent!" << endl;
-        
+
+       unsigned char cmd[] = {'@','X'};
+       serial.writeBytes(&cmd[0],2);
+       cout << "Display toggle CMD sent!" << endl;
         
         nTimesRead = 0;
         nBytesRead = 0;
@@ -97,7 +97,7 @@ void ofApp::draw(){
         ofSetColor(pixelStrip[i]);
         ofRect(i*4, 0, 4, 4);
     }
-    img.draw(0, 0,100,100);
+    // img.draw(0, 0,100,100);
 }
 
 
