@@ -35,24 +35,12 @@ void ofApp::update(){
     float brightness = ofMap(mouseX, 0, 800, 0, 255);
     // cout << brightness << endl;
     
-    // Indicate DATA is coming
-    if(serial.isInitialized()){
-        serial.writeByte('$');
-    }
-    
-    
     for(int i = 0; i < 10; i++){
         for(int j=0; j < 10;j++){
             pixelMatrix[i][j].setHsb( hue, ofMap(i, 0, 10, 0, 255), ofMap(j, 10, 0, 0, 128 ) );
             
             img.getPixelsRef().setColor(i, j, pixelMatrix[i][j]);
             
-            if(serial.isInitialized()){
-                // push out the acutal data, r g b pixel per pixel
-                serial.writeByte(pixelMatrix[i][j].r);
-                serial.writeByte(pixelMatrix[i][j].g);
-                serial.writeByte(pixelMatrix[i][j].b);
-            }
         }
     }
     
@@ -62,9 +50,25 @@ void ofApp::update(){
 
     if (bSendSerialMessage){
         
-        unsigned char cmd[] = {'@','X'};
-        serial.writeBytes(&cmd[0],2);
-        cout << "Display toggle CMD sent!" << endl;
+        // Indicate DATA is coming
+        serial.writeByte('$');
+   
+        
+        for(int i = 0; i < 10; i++){
+            for(int j=0; j < 10;j++){
+                
+                    // push out the acutal data, r g b pixel per pixel
+                    serial.writeByte(pixelMatrix[i][j].r);
+                    serial.writeByte(pixelMatrix[i][j].g);
+                    serial.writeByte(pixelMatrix[i][j].b);
+               
+            }
+        }
+        
+        
+//        unsigned char cmd[] = {'@','X'};
+//        serial.writeBytes(&cmd[0],2);
+//        cout << "Display toggle CMD sent!" << endl;
         
         
         nTimesRead = 0;
