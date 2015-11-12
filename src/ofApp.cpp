@@ -12,9 +12,14 @@ void ofApp::setup(){
     vector <ofSerialDeviceInfo> deviceList = serial.getDeviceList();
     
     int baud = 9600;
+        
+    #ifdef __arm__
+    serial.setup("/dev/ttyACM0", baud); //open the first device
+    #else 
     serial.setup("/dev/tty.usbmodem1216041", baud); //open the first device
-    // serial.setup("/dev/tty.usbmodem1216041", baud); //open the first device
-    
+    #endif
+
+
     memset(bytesReadString, 0, 256);
 
     ofSetFrameRate(30);
@@ -27,21 +32,27 @@ void ofApp::update(){
     
     // Fill the Matrix with sample Color
     float hue = fmodf(ofGetElapsedTimef()*100,255);
+    float brightness = ofMap(mouseX, 0, 800, 0, 255);
+    // cout << brightness << endl;
     
     // Indicate DATA is coming
-    serial.writeByte('$');
+    if(serial.isInitialized()){
+        serial.writeByte('$');
+    }
+    
     
     for(int i = 0; i < 10; i++){
         for(int j=0; j < 10;j++){
-            pixelMatrix[i][j].setHsb( hue, ofMap(i, 0, 10, 0, 255), ofMap(j, 10, 0, 0, 255 ) );
+            pixelMatrix[i][j].setHsb( hue, ofMap(i, 0, 10, 0, 255), ofMap(j, 10, 0, 0, 128 ) );
             
             img.getPixelsRef().setColor(i, j, pixelMatrix[i][j]);
             
-            // push out the acutal data, r g b pixel per pixel
-
-            serial.writeByte(pixelMatrix[i][j].r);
-            serial.writeByte(pixelMatrix[i][j].g);
-            serial.writeByte(pixelMatrix[i][j].b);
+            if(serial.isInitialized()){
+                // push out the acutal data, r g b pixel per pixel
+                serial.writeByte(pixelMatrix[i][j].r);
+                serial.writeByte(pixelMatrix[i][j].g);
+                serial.writeByte(pixelMatrix[i][j].b);
+            }
         }
     }
     
@@ -51,13 +62,9 @@ void ofApp::update(){
 
     if (bSendSerialMessage){
         
-        int newbytetosend = '@';
-        serial.writeByte(newbytetosend);
-        cout << "Byte wrote: " << newbytetosend << " thats an: " << (char) newbytetosend << endl;
-        
-        newbytetosend = 'X';
-        serial.writeByte(newbytetosend);
-        cout << "Byte wrote: " << newbytetosend << " thats an: " << (char) newbytetosend << endl;
+        unsigned char cmd[] = {'@','X'};
+        serial.writeBytes(&cmd[0],2);
+        cout << "Display toggle CMD sent!" << endl;
         
         
         nTimesRead = 0;
