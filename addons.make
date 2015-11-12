@@ -1,6 +1,3 @@
 ofxGui
-ofxKinect
-ofxNetwork
 ofxOpenCv
-ofxXmlSettings
-ofxAnimatable
+
