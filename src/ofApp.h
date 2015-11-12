@@ -4,10 +4,9 @@
 #include "ConsoleListener.h"
 
 #ifdef __arm__
+    #include "ofxCv.h"
     #include "ofxCvPiCam.h"
 #endif
-
-
 
 class ofApp : public ofBaseApp , public SSHKeyListener{
     

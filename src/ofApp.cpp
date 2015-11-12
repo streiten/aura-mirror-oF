@@ -1,5 +1,12 @@
 #include "ofApp.h"
 
+#ifdef __arm__
+    #include <opencv2/opencv.hpp>
+    using namespace ofxCv;
+    using namespace cv;
+    Mat frame,frameProcessed;
+#endif
+
 //--------------------------------------------------------------
 void ofApp::setup(){
 
