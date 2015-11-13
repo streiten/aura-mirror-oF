@@ -35,16 +35,10 @@ void ofApp::setup(){
     // img.allocate(10, 10, OF_IMAGE_COLOR);
     #ifdef __arm__
         cam.setup(320,240,false);//setup camera (w,h,color = true,gray = false);
-        //cam.setSaturation(value);
-        //cam.setSharpness(value);
-        //cam.setContrast(value);
-        //cam.setBrightness(value);
-        //cam.setISO(value);
-        //cam.setVideoStabilisation(value);
-        //cam.setExposureCompensation(value);
+        cam.setFlips(true,false);
+        thresh = 127;
     #endif
 
-    thresh = 127;
 }
 
 
@@ -212,10 +206,14 @@ void ofApp::onCharacterReceived(SSHKeyListenerEventData& e)
 
 //--------------------------------------------------------------
 void ofApp::keyPressed(int key){
+    
     ofLogVerbose() << "keyPressed: " << key;
-    if(key == 't' && thresh > 0)   thresh--;
-    if(key == 'T' && thresh < 255) thresh++;
-    cout << "Keypressed:" << key << endl;
+    if(key == 's') { activePiCamSetting = 0 ;}
+    if(key == 'S') { activePiCamSetting = 1 ;}
+    if(key == 'c') { activePiCamSetting = 2 ;}
+    if(key == 'b') { activePiCamSetting = 3 ;}
+    if(key == 't') { activePiCamSetting = 4 ;}
+
 }
 
 //--------------------------------------------------------------
@@ -230,7 +228,19 @@ void ofApp::mouseMoved(int x, int y ){
 
 //--------------------------------------------------------------
 void ofApp::mouseDragged(int x, int y, int button){
-    thresh = ofMap(x,0,ofGetWidth(),0,255);
+        
+    #ifdef __arm__
+        if( activePiCamSetting == 0 ) { cam.setSaturation(ofMap(x,0,ofGetWidth(),-100,100));}
+        if( activePiCamSetting == 1 ) { cam.setSharpness(ofMap(x,0,ofGetWidth(),-100,100));}
+        if( activePiCamSetting == 2 ) { cam.setContrast(ofMap(x,0,ofGetWidth(),-100,100));}
+        if( activePiCamSetting == 3 ) { cam.setBrightness(ofMap(x,0,ofGetWidth(),0,100));}
+        if( activePiCamSetting == 4 ) { thresh = ofMap(x,0,ofGetWidth(),0,255); }
+    #endif
+
+    //cam.setISO(value);
+    //cam.setVideoStabilisation(value);
+    //cam.setExposureCompensation(value);
+
 }
 
 //--------------------------------------------------------------
@@ -260,14 +270,6 @@ void ofApp::dragEvent(ofDragInfo dragInfo){
 }
 
 
-//cam.setSaturation(value);
-//cam.setSharpness(value);
-//cam.setContrast(value);
-//cam.setBrightness(value);
-//cam.setISO(value);
-//cam.setVideoStabilisation(value);
-//cam.setExposureCompensation(value);
-//
 //exposureMeteringMode.setName(exposureMeteringModes[value]);                            //display the preset name in the UI
 //if(value == exposureMeteringMode.getMax()) value = MMAL_PARAM_EXPOSUREMETERINGMODE_MAX;//the preset max value is different from the UI
 //cam.setExposureMeteringMode((MMAL_PARAM_EXPOSUREMETERINGMODE_T)value);
