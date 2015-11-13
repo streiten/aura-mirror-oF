@@ -54,6 +54,5 @@ public:
     
     ConsoleListener consoleListener;
     void onCharacterReceived(SSHKeyListenerEventData& e);
-
     
 };

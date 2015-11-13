@@ -35,6 +35,13 @@ void ofApp::setup(){
     // img.allocate(10, 10, OF_IMAGE_COLOR);
     #ifdef __arm__
         cam.setup(320,240,false);//setup camera (w,h,color = true,gray = false);
+        //cam.setSaturation(value);
+        //cam.setSharpness(value);
+        //cam.setContrast(value);
+        //cam.setBrightness(value);
+        //cam.setISO(value);
+        //cam.setVideoStabilisation(value);
+        //cam.setExposureCompensation(value);
     #endif
 
     thresh = 127;
@@ -58,7 +65,7 @@ void ofApp::update(){
 
     for(int i = 0; i < 10; i++){
         for(int j=0; j < 10;j++){
-            pixelMatrix[i][j].setHsb( hue, ofMap(i, 0, 10, 0, 255), ofMap(j, 10, 0, 0, 128 ) );
+                pixelMatrix[i][j].setHsb( hue, ofMap(i, 0, 10, 0, 255), ofMap(j, 10, 0, 0, 128 ) );
         // Indicate DATA is coming
 
                 // push out the acutal data, r g b pixel per pixel
@@ -125,7 +132,9 @@ void ofApp::draw(){
     // drawMatrix();
     // Draw the raw strip on the very top for debug
     for (int i = 0; i<190; i++) {
+        ofPushStyle();
         ofSetColor(pixelStrip[i]);
+        ofPopStyle();
         // ofRectangle(i*4, 0, 4, 4);
     }
     // img.draw(0, 0,100,100);
