@@ -1,12 +1,14 @@
 #include "ofApp.h"
 
+using namespace ofxCv;
+using namespace cv;
+
 #ifdef __arm__
     #include <opencv2/opencv.hpp>
     Mat frame,frameProcessed;
 #endif
 
-using namespace ofxCv;
-using namespace cv;
+
 
 //--------------------------------------------------------------
 void ofApp::setup(){
@@ -105,7 +107,7 @@ void ofApp::update(){
 void ofApp::draw(){
     
     #ifdef __arm__
-    if(!frame.empty()) {
+        if(!frame.empty()) {
         //threshold(frame,frameProcessed,thresh,255,0);
         //drawMat(frameProcessed,320,0);
         drawMat(frame,0,0);
