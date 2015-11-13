@@ -74,19 +74,21 @@ void ofApp::update(){
             
         }
     }
-
-    serial.writeBytes(&serialOutBuffer[0],301);
-
+    
+    if(serial.isInitialized()){
+        serial.writeBytes(&serialOutBuffer[0],301);
+    }
+       
    // img.update();
     
     generateStripData();
 
     if (bSendSerialMessage){
-
-       unsigned char cmd[] = {'@','X'};
-       serial.writeBytes(&cmd[0],2);
-       cout << "Display toggle CMD sent!" << endl;
-        
+        if(serial.isInitialized()){
+            unsigned char cmd[] = {'@','X'};
+            serial.writeBytes(&cmd[0],2);
+            cout << "Display toggle CMD sent!" << endl;
+       
         nTimesRead = 0;
         nBytesRead = 0;
         int nRead  = 0;  // a temp variable to keep count per read
@@ -106,6 +108,7 @@ void ofApp::update(){
         cout << "Display said:" << bytesReadString << endl;
         
         bSendSerialMessage = false;
+        }
     }
 }
 
