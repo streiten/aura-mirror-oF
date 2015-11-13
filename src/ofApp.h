@@ -1,12 +1,14 @@
 #pragma once
 
 #include "ofMain.h"
-#include "ConsoleListener.h"
 
 #ifdef __arm__
     #include "ofxCv.h"
     #include "ofxCvPiCam.h"
 #endif
+
+#include "ConsoleListener.h"
+
 
 class ofApp : public ofBaseApp , public SSHKeyListener{
     

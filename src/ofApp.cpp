@@ -25,9 +25,9 @@ void ofApp::setup(){
     memset(bytesReadString, 0, 256);
 
     // General
-    ofBackground(0, 0, 0);
-    ofSetVerticalSync(false);
-    ofSetFrameRate(30);
+    // ofBackground(0, 0, 0);
+    // ofSetVerticalSync(false);
+    // ofSetFrameRate(30);
     
     consoleListener.setup(this);
     consoleListener.startThread(false, false);
@@ -38,9 +38,6 @@ void ofApp::setup(){
     #endif
 
     thresh = 127;
-
-    
-
 }
 
 
@@ -121,6 +118,7 @@ void ofApp::draw(){
         drawMat(frame,0,0);
         drawMat(frameProcessed,320,0);
     }
+    ofDrawBitmapString("threshold: " + ofToString(thresh),320,10);
     #endif
 
     
@@ -205,10 +203,10 @@ void ofApp::onCharacterReceived(SSHKeyListenerEventData& e)
 
 //--------------------------------------------------------------
 void ofApp::keyPressed(int key){
-//    ofLogVerbose() << "keyPressed: " << key;
-//    if(key == 't' && thresh > 0)   thresh--;
-//    if(key == 'T' && thresh < 255) thresh++;
-//    cout << "Keypressed:" << key << endl;
+    ofLogVerbose() << "keyPressed: " << key;
+    if(key == 't' && thresh > 0)   thresh--;
+    if(key == 'T' && thresh < 255) thresh++;
+    cout << "Keypressed:" << key << endl;
 }
 
 //--------------------------------------------------------------
@@ -223,7 +221,7 @@ void ofApp::mouseMoved(int x, int y ){
 
 //--------------------------------------------------------------
 void ofApp::mouseDragged(int x, int y, int button){
-    
+    thresh = ofMap(x,0,ofGetWidth(),0,255);
 }
 
 //--------------------------------------------------------------
@@ -251,3 +249,43 @@ void ofApp::gotMessage(ofMessage msg){
 void ofApp::dragEvent(ofDragInfo dragInfo){
     
 }
+
+
+//cam.setSaturation(value);
+//cam.setSharpness(value);
+//cam.setContrast(value);
+//cam.setBrightness(value);
+//cam.setISO(value);
+//cam.setVideoStabilisation(value);
+//cam.setExposureCompensation(value);
+//
+//exposureMeteringMode.setName(exposureMeteringModes[value]);                            //display the preset name in the UI
+//if(value == exposureMeteringMode.getMax()) value = MMAL_PARAM_EXPOSUREMETERINGMODE_MAX;//the preset max value is different from the UI
+//cam.setExposureMeteringMode((MMAL_PARAM_EXPOSUREMETERINGMODE_T)value);
+//
+//exposureMode.setName(exposureModes[value]);//display the preset name in the UI
+//if(value == exposureMode.getMax()) value = MMAL_PARAM_EXPOSUREMODE_MAX;//the preset max value is different from the UI
+//cam.setExposureMode((MMAL_PARAM_EXPOSUREMODE_T)value);
+//
+//awbMode.setName(awbModes[value]);//display the preset name in the UI
+//if(value == awbMode.getMax()) value = MMAL_PARAM_AWBMODE_MAX;//the preset max value is different from the UI
+//cam.setAWBMode((MMAL_PARAM_AWBMODE_T)value);
+//
+//imageFX.setName(imageFXLabels[value]);//display the preset name in the UI
+//if(value == imageFX.getMax()) value = MMAL_PARAM_IMAGEFX_MAX;//the preset max value is different from the UI
+//cam.setImageFX((MMAL_PARAM_IMAGEFX_T)value);
+//
+//cam.setShutterSpeed(value);
+//cam.setRotation(value);
+//cam.setFlips(value,vflip.get());
+//cam.setFlips(hflip.get(),value);
+//ROI.x = value;
+//cam.setROI(ROI);
+//ROI.y = value;
+//cam.setROI(ROI);
+//ROI.width = value;
+//cam.setROI(ROI);
+//ROI.height = value;
+//cam.setROI(ROI);
+//cam.setAWBGains(value,awbGainB.get());
+//cam.setAWBGains(awbGainR.get(),value);
