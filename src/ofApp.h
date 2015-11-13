@@ -37,6 +37,8 @@ public:
     void generateMirrorFrame();
     void sendFrameToMirror();
     
+    bool display_on = true;
+    
     bool debug;
     int matrixStyle;
     
@@ -87,5 +89,8 @@ public:
 
     ConsoleListener consoleListener;
     void onCharacterReceived(SSHKeyListenerEventData& e);
+    
+    void sendCommandToMirror(unsigned char cmd);
+    
     
 };

@@ -75,31 +75,7 @@ void ofApp::update(){
     generateStripData();
 
     if (bSendSerialMessage){
-        if(serial.isInitialized()){
-            unsigned char cmd[] = {'@','X'};
-            serial.writeBytes(&cmd[0],2);
-            cout << "Display toggle CMD sent!" << endl;
-       
-        nTimesRead = 0;
-        nBytesRead = 0;
-        int nRead  = 0;  // a temp variable to keep count per read
-        
-        unsigned char bytesReturned[255];
-        
-        memset(bytesReadString, 0, 256);
-        memset(bytesReturned, 0, 255);
-        
-        while( (nRead = serial.readBytes( bytesReturned, 255)) > 0){
-            nTimesRead++;
-            nBytesRead = nRead;
-        };
-        
-        memcpy(bytesReadString, bytesReturned, 255);
-        
-        cout << "Display said:" << bytesReadString << endl;
-        
-        bSendSerialMessage = false;
-        }
+        sendCommandToMirror('X');
     }
 }
 
@@ -116,15 +92,25 @@ void ofApp::draw(){
     #else
         cam.draw(0, 0);
     #endif
-
     finder.draw();
-    
     
     // ofDrawBitmapString("threshold: " + ofToString(thresh),320,10);
     
     drawMatrix();
     // drawStrip();
     // img.draw(0, 0,100,100);
+    
+    if(finder.size() > 0) {
+        if(display_on){
+            sendCommandToMirror('X');
+            display_on = false;
+        }
+    } else {
+        if(!display_on){
+            sendCommandToMirror('X');
+            display_on = true;
+        }
+    }
     
     ofDrawBitmapStringHighlight(ofToString((int) ofGetFrameRate()) + "fps", 10, 20);
     ofDrawBitmapStringHighlight(ofToString(finder.size()), 10, 40);
@@ -309,8 +295,36 @@ void ofApp::dragEvent(ofDragInfo dragInfo){
     
 }
 
+void ofApp::sendCommandToMirror(unsigned char cmd) {
+    if(serial.isInitialized()){
 
-//exposureMeteringMode.setName(exposureMeteringModes[value]);                            //display the preset name in the UI
+    unsigned char cmdseq[] = {'@', cmd };
+    serial.writeBytes(&cmdseq[0],2);
+    cout << "Display toggle CMD sent!" << endl;
+    
+    nTimesRead = 0;
+    nBytesRead = 0;
+    int nRead  = 0;  // a temp variable to keep count per read
+    
+    unsigned char bytesReturned[255];
+    
+    memset(bytesReadString, 0, 256);
+    memset(bytesReturned, 0, 255);
+    
+    while( (nRead = serial.readBytes( bytesReturned, 255)) > 0){
+        nTimesRead++;
+        nBytesRead = nRead;
+    };
+    
+    memcpy(bytesReadString, bytesReturned, 255);
+    cout << "Display said:" << bytesReadString << endl;
+    bSendSerialMessage = false;
+    }
+    
+}
+
+//exposureMeteringMode.setName(exposureMeteringModes[value]);
+//display the preset name in the UI
 //if(value == exposureMeteringMode.getMax()) value = MMAL_PARAM_EXPOSUREMETERINGMODE_MAX;//the preset max value is different from the UI
 //cam.setExposureMeteringMode((MMAL_PARAM_EXPOSUREMETERINGMODE_T)value);
 //
