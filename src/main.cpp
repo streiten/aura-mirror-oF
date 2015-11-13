@@ -5,7 +5,7 @@
 int main( ){
 
     ofSetLogLevel(OF_LOG_VERBOSE);
-    ofSetupOpenGL(1280,720,OF_WINDOW);			// <-------- setup the GL context
+    ofSetupOpenGL(640,480,OF_WINDOW);			// <-------- setup the GL context
 	ofRunApp(new ofApp());
 
 }

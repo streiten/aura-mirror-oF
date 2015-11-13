@@ -1,13 +1,13 @@
 #pragma once
 
 #include "ofMain.h"
+#include "ofxCv.h"
+#include "ConsoleListener.h"
 
 #ifdef __arm__
-    #include "ofxCv.h"
     #include "ofxCvPiCam.h"
 #endif
 
-#include "ConsoleListener.h"
 
 
 class ofApp : public ofBaseApp , public SSHKeyListener{
@@ -28,9 +28,14 @@ public:
     void gotMessage(ofMessage msg);
     
     void drawMatrix();
+    void drawStrip();
+    
     ofColor pixelMatrix[10][10];
     ofColor pixelStrip[200];
     void generateStripData();
+    
+    void generateMirrorFrame();
+    void sendFrameToMirror();
     
     bool debug;
     int matrixStyle;
@@ -74,8 +79,12 @@ public:
         string exposureMeteringModes[5];
         string awbModes[11];
         string imageFXLabels[24];
+    #else
+        ofVideoGrabber cam;
     #endif
-    
+
+    ofxCv::ObjectFinder finder;
+
     ConsoleListener consoleListener;
     void onCharacterReceived(SSHKeyListenerEventData& e);
     

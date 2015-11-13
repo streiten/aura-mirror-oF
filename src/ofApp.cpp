@@ -2,15 +2,24 @@
 
 #ifdef __arm__
     #include <opencv2/opencv.hpp>
-    using namespace ofxCv;
-    using namespace cv;
     Mat frame,frameProcessed;
 #endif
+
+using namespace ofxCv;
+using namespace cv;
 
 //--------------------------------------------------------------
 void ofApp::setup(){
 
     debug = true;
+    
+    // General
+    ofBackground(0, 0, 0);
+    //ofSetVerticalSync(true);
+    //ofSetFrameRate(120);
+    
+    consoleListener.setup(this);
+    consoleListener.startThread(false, false);
     
     // Serial
     bSendSerialMessage = false;
@@ -23,23 +32,25 @@ void ofApp::setup(){
         serial.setup("/dev/tty.usbmodem1216041", baud); //open the first device
     #endif
     memset(bytesReadString, 0, 256);
-
-    // General
-    // ofBackground(0, 0, 0);
-    // ofSetVerticalSync(false);
-    // ofSetFrameRate(30);
-    
-    consoleListener.setup(this);
-    consoleListener.startThread(false, false);
     
     // img.allocate(10, 10, OF_IMAGE_COLOR);
+    
+    // Cam & Facedetection
+    finder.setPreset(ObjectFinder::Fast);
+
     #ifdef __arm__
-        cam.setup(320,240,false);//setup camera (w,h,color = true,gray = false);
-        cam.setFlips(true,false);
-        thresh = 127;
+        finder.setup("haarcascade_frontalface_alt2.xml");
+        cam.setup(320,240,true);//setup camera (w,h,color = true,gray = false);
+        cam.setFlips(false,true);
+    #else
+        cam.setup(640,480);
+        finder.setup("haarcascade_frontalface_default.xml");
     #endif
 
+    thresh = 127;
+
 }
+
 
 
 //--------------------------------------------------------------
@@ -47,38 +58,18 @@ void ofApp::update(){
     
     #ifdef __arm__
         frame = cam.grab();
-    #endif
-
-    // Fill the Matrix with sample Color
-    float hue = fmodf(ofGetElapsedTimef()*100,255);
-    // float brightness = ofMap(mouseX, 0, 800, 0, 255);
-    // cout << brightness << endl;
-    unsigned char serialOutBuffer[301];
-    serialOutBuffer[0] = '$';
-    int p = 0;
-
-    for(int i = 0; i < 10; i++){
-        for(int j=0; j < 10;j++){
-                pixelMatrix[i][j].setHsb( hue, ofMap(i, 0, 10, 0, 255), ofMap(j, 10, 0, 0, 128 ) );
-        // Indicate DATA is coming
-
-                // push out the acutal data, r g b pixel per pixel
-                serialOutBuffer[3*p+1] = pixelMatrix[i][j].r;
-                serialOutBuffer[3*p+2] = pixelMatrix[i][j].g;
-                serialOutBuffer[3*p+3] = pixelMatrix[i][j].b;
-                p++;
-
-       //   img.getPixelsRef().setColor(i, j, pixelMatrix[i][j]);
-            
+        if(!frame.empty()) finder.update(frame);
+    #else
+        cam.update();
+        if(cam.isFrameNew()) {
+            finder.update(cam);
         }
-    }
+    #endif
     
-    if(serial.isInitialized()){
-        serial.writeBytes(&serialOutBuffer[0],301);
-    }
+    generateMirrorFrame();
+    sendFrameToMirror();
        
-   // img.update();
-    
+    // img.update();
     generateStripData();
 
     if (bSendSerialMessage){
@@ -115,23 +106,27 @@ void ofApp::draw(){
     
     #ifdef __arm__
     if(!frame.empty()) {
-        threshold(frame,frameProcessed,thresh,255,0);
+        //threshold(frame,frameProcessed,thresh,255,0);
+        //drawMat(frameProcessed,320,0);
         drawMat(frame,0,0);
-        drawMat(frameProcessed,320,0);
+        finder.draw();
     }
-    ofDrawBitmapString("threshold: " + ofToString(thresh),320,10);
+    #else
+        cam.draw(0, 0);
     #endif
 
+    finder.draw();
     
-    // drawMatrix();
-    // Draw the raw strip on the very top for debug
-    for (int i = 0; i<190; i++) {
-        ofPushStyle();
-        ofSetColor(pixelStrip[i]);
-        ofPopStyle();
-        // ofRectangle(i*4, 0, 4, 4);
-    }
+    
+    // ofDrawBitmapString("threshold: " + ofToString(thresh),320,10);
+    
+    drawMatrix();
+    // drawStrip();
     // img.draw(0, 0,100,100);
+    
+    ofDrawBitmapStringHighlight(ofToString((int) ofGetFrameRate()) + "fps", 10, 20);
+    ofDrawBitmapStringHighlight(ofToString(finder.size()), 10, 40);
+
 }
 
 
@@ -171,30 +166,73 @@ void ofApp::drawMatrix() {
     
     for(int i = 0; i < 10; i++){
         for(int j=0; j < 19;j++){
-            
             // Calculate position of Pixels to emulate Hardware zig-zag setup
             int jNew = j;
-            
             // invert from left / right order every second row
             if((i+1)%2 == 0) {
                jNew = 18 - j;
             }
             
-            int x = jNew*40+20;
-            int y = i*80+20;
-            
+            int x = jNew*10+5;
+            int y = i*20+5;
+            ofPushStyle();
+            ofFill();
             ofSetColor(pixelStrip[k]);
+            ofDrawRectangle(x,y,10,10);
+            ofPopStyle();
             k++;
             
             if(debug) {
-                ofDrawBitmapString(ofToString(k),x,y);
+                // ofDrawBitmapString(ofToString(k),x,y);
             }
-            
-            ofRectangle(x,y,20,20);
+
             
         }
     }
+}
+
+void ofApp::drawStrip() {
+    for (int i = 0; i<190; i++) {
+        ofPushStyle();
+        ofSetColor(pixelStrip[i]);
+        ofFill();
+        ofDrawRectangle(i*4, 0, 4, 4);
+        ofPopStyle();
+    }
+}
+
+
+void ofApp::generateMirrorFrame() {
+
+    float hue = fmodf(ofGetElapsedTimef()*100,255);
+    // float brightness = ofMap(mouseX, 0, 800, 0, 255);
+    // cout << brightness << endl;
     
+    for(int i = 0; i < 10; i++){
+        for(int j=0; j < 10;j++){
+            pixelMatrix[i][j].setHsb( hue, ofMap(i, 0, 10, 0, 255), ofMap(j, 10, 0, 0, 128 ) );
+            //   img.getPixelsRef().setColor(i, j, pixelMatrix[i][j]);
+        }
+    }
+}
+
+void ofApp::sendFrameToMirror() {
+    if(serial.isInitialized()){
+        unsigned char serialOutBuffer[301];
+        // Indicate DATA is coming
+        serialOutBuffer[0] = '$';
+        int p = 0;
+        for(int i = 0; i < 10; i++){
+            for(int j=0; j < 10;j++){
+                // push out the acutal data, r g b pixel per pixel
+                serialOutBuffer[3*p+1] = pixelMatrix[i][j].r;
+                serialOutBuffer[3*p+2] = pixelMatrix[i][j].g;
+                serialOutBuffer[3*p+3] = pixelMatrix[i][j].b;
+                p++;
+            }
+        }
+        serial.writeBytes(&serialOutBuffer[0],301);
+    }
 }
 
 void ofApp::onCharacterReceived(SSHKeyListenerEventData& e)
