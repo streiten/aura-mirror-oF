@@ -2,8 +2,13 @@
 
 #include "ofMain.h"
 #include "ofxCv.h"
+#include "ofxGui.h"
+#include "ofxAnimatableFloat.h"
+
 #include "ConsoleListener.h"
-// #include "auraDisplay.h"
+#include "auraAnimations.h"
+#include "auraDisplay.h"
+
 
 #ifdef __arm__
     #include "ofxCvPiCam.h"
@@ -37,6 +42,7 @@ public:
 
     void generateMirrorTestFrame();
     void generateMirrorFrame();
+    void setMirrorFrameBrightness(float brightness);
 
     void sendFrameToMirror();
     bool display_on = true;
@@ -104,15 +110,32 @@ public:
     
     int currentImage;
     
-    // Scenes
+    int shiftIndex;
+    void shiftMatrix(int dir);
+    
+    auraTimer sparkleTimer;
+    auraTimer shiftTimer;
     
     void sceneSparkle();
     void sceneMirror();
     void sceneTransition();
     
-    // Animations
-    int delay;
-    int last_time;
+    // ofColor pixelMatrix;
+    int sceneIndex;
+    int sceneCount;
     
+    // GUI
+    void setupGui();
+    ofxPanel gui;
+    ofParameterGroup paramsGroup1;
+    ofParameter<float> pColorR;
+    ofParameter<float> pColorG;
+    ofParameter<float> pColorB;
+    ofParameter<int> pMultiplier;
+    ofParameter<int> pDivider;
+    ofParameter<int> pBrightness;
+    
+    ofxAnimatableFloat shift;
+    ofxAnimatableFloat sparklePulse;
 
 };

@@ -23,10 +23,7 @@ void ofApp::setup(){
     ofBackground(0, 0, 0);
     //ofSetVerticalSync(true);
     //ofSetFrameRate(120);
-    delay = 3000;
-    last_time = ofGetElapsedTimeMillis();
-
-
+    
     consoleListener.setup(this);
     consoleListener.startThread(false, false);
     
@@ -81,19 +78,37 @@ void ofApp::setup(){
     for(int i = 0; i < (int)dir.size(); i++){
         images[i].loadImage(dir.getPath(i));
     }
+    
     currentImage = 0;
     
     // matrixOverlay.loadImage("radialoveray.png");
     
     ofBackground(ofColor::white);
+    
+    // Scenes
+    sceneIndex = 0;
+    sceneCount = 3;
+    
+    shiftIndex = 0;
+    
+    sparkleTimer.set(3000);
+    shiftTimer.set(500);
+    
     sceneSparkle();
-
+    
+    sparklePulse.animateTo(255);
+    sparklePulse.setRepeatType(LOOP_BACK_AND_FORTH);
+    sparklePulse.setCurve(EASE_IN_EASE_OUT);
+    
+    // The Gui
+    setupGui();
 }
 
 
 
 //--------------------------------------------------------------
 void ofApp::update(){
+    
     
     #ifdef __arm__
         frame = cam.grab();
@@ -107,18 +122,42 @@ void ofApp::update(){
         }
     #endif
     
-    // generateMirrorFrame();
+    shift.update(1.0f/100);
+    sparklePulse.update(1.0f/700);
+
+    switch(sceneIndex) {
     
-    if( ofGetElapsedTimeMillis() - last_time > delay ) {
-        last_time = ofGetElapsedTimeMillis();
-        sceneSparkle();
+        case 0:
+            sceneSparkle();
+            break;
+            
+        case 1:
+            
+            if( shiftTimer.check() ) {
+                generateMirrorFrame();
+
+                for(int i = 0; i < shiftIndex ;i++) {
+                    shiftMatrix(1);
+                }
+                shiftIndex++;
+                if(shiftIndex > 9) shiftIndex = 0;
+            }
+            
+            setMirrorFrameBrightness(pBrightness);
+
+            break;
+            
+        case 2:
+            generateMirrorTestFrame();
+            break;
+        
+        default:
+            break;
+    
     }
     
-    // float hue = fmodf(ofGetElapsedTimef()*10,255);
-
-    sendFrameToMirror();
-       
-    // img.update();
+    
+    // for debug display
     generateStripData();
 
     if (bSendSerialMessage){
@@ -131,6 +170,8 @@ void ofApp::update(){
 
 //--------------------------------------------------------------
 void ofApp::draw(){
+    
+    sendFrameToMirror();
     
     #ifdef __arm__
         if(!frame.empty()) {
@@ -184,36 +225,41 @@ void ofApp::draw(){
     
     images[currentImage].draw(ofGetWidth()-100,0,100,100);
     // matrixOverlay.draw(ofGetWidth()-300,0,300,300);
+    
+    gui.draw();
 
 }
 
-
 void ofApp::sceneSparkle(){
-    
-    ofColor c;
-    // Chose a random pixel and slowly pulse
-    
-    int randIndexI = (int) ofRandom(10);
-    int randIndexJ = (int) ofRandom(10);
 
-    c.set(0, 0, 0);
+    int k = 0;
+    int setMatrix[] = {
+        0,0,0,0,0,0,0,0,0,0,
+        0,0,0,0,0,0,0,0,0,0,
+        0,0,0,0,0,0,0,0,0,0,
+        0,0,0,0,0,1,0,0,0,0,
+        0,0,0,0,1,0,0,0,0,0,
+        0,0,0,0,1,1,0,0,0,0,
+        0,0,0,1,0,0,0,0,0,0,
+        0,0,0,0,0,0,0,0,0,0,
+        0,0,0,0,0,0,0,0,0,0,
+        0,0,0,0,0,0,0,0,0,0
+    };
+    
     for(int i = 0; i < 10; i++){
         for(int j=0; j < 10;j++){
-            pixelMatrix[i][j] = c;
+            if(setMatrix[k] == 0 ){
+                pixelMatrix[i][j] = ofColor(0,0,0);
+            } else {
+                pixelMatrix[i][j] = ofColor(255,255,255);
+                pixelMatrix[i][j].setBrightness(sparklePulse.val());
+            };
+           k++;
         }
     }
-    c.set(128,128,128);
-    pixelMatrix[randIndexI][randIndexJ ] = c;
-    
-};
-
-void ofApp::sceneMirror(){
 
 };
 
-void ofApp::sceneTransition(){
-
-};
 
 
 // +++ DISPLAY FUNCTIONS +++
@@ -273,11 +319,6 @@ void ofApp::drawMatrix() {
             
             k++;
             
-            if(debug) {
-                // ofDrawBitmapString(ofToString(k),x,y);
-            }
-
-            
         }
     }
 }
@@ -294,27 +335,67 @@ void ofApp::drawStrip() {
 
 void ofApp::generateMirrorFrame() {
     
+    ofColor c;
     
     for(int i = 0; i < 10; i++){
         for(int j=0; j < 10;j++){
-            pixelMatrix[i][j] = images[currentImage].getPixelsRef().getColor(i, j);
+            c = images[currentImage].getPixelsRef().getColor(j,i);
+            pixelMatrix[i][j] = c;
         }
     }
+
 }
 
 
-void ofApp::generateMirrorTestFrame() {
-
-    float hue = fmodf(ofGetElapsedTimef()*100,255);
-    // float brightness = ofMap(mouseX, 0, 800, 0, 255);
-    // cout << brightness << endl;
-    
+void ofApp::setMirrorFrameBrightness( float brightness ) {
     for(int i = 0; i < 10; i++){
         for(int j=0; j < 10;j++){
-            pixelMatrix[i][j].setHsb( hue, ofMap(i, 0, 10, 0, 255), ofMap(j, 10, 0, 0, 128 ) );
-            //   img.getPixelsRef().setColor(i, j, pixelMatrix[i][j]);
+            pixelMatrix[i][j].setBrightness( brightness );
         }
     }
+    
+}
+
+
+void ofApp::shiftMatrix(int dir) {
+
+    
+    ofColor line_buffer[10];
+
+    switch(dir) {
+        case 0:
+            memcpy(&line_buffer,&pixelMatrix, sizeof(ofColor)*10);
+            for(int i=0;i<9;i++) {
+                memcpy(&pixelMatrix[i],&pixelMatrix[i+1], sizeof(ofColor)*10);
+            }
+            memcpy(&pixelMatrix[9], &line_buffer, sizeof(ofColor)*10);
+            break;
+            
+        case 1:
+            memcpy(&line_buffer,&pixelMatrix[9], sizeof(ofColor)*10);
+            for(int i=0;i<9;i++) {
+                memcpy(&pixelMatrix[9-i],&pixelMatrix[8-i], sizeof(ofColor)*10);
+            }
+            memcpy(&pixelMatrix[0], &line_buffer, sizeof(ofColor)*10);
+            break;
+            
+        default:
+            break;
+    }
+    
+}
+
+void ofApp::generateMirrorTestFrame() {
+
+    for(int i = 0; i < 10; i++){
+        for(int j=0; j < 10;j++){
+            pixelMatrix[i][j] = ofColor(0,0,0);
+        }
+    }
+
+    pixelMatrix[0][0] = ofColor(255,0,0);
+    pixelMatrix[5][5] = ofColor(0,255,0);
+    pixelMatrix[9][9] = ofColor(0,0,255);
 }
 
 void ofApp::sendFrameToMirror() {
@@ -344,8 +425,6 @@ void ofApp::onCharacterReceived(SSHKeyListenerEventData& e)
     keyPressed((int)e.character);
 }
 
-
-
 //--------------------------------------------------------------
 void ofApp::keyPressed(int key){
     
@@ -361,6 +440,12 @@ void ofApp::keyPressed(int key){
             currentImage++;
             currentImage %= dir.size();
         }
+    }
+    
+    if(key == 'o') {
+        sceneIndex++;
+        sceneIndex %= sceneCount;
+       
     }
     
     if(key == ' ') {
@@ -448,6 +533,30 @@ void ofApp::sendCommandToMirror(unsigned char cmd) {
     }
     
 }
+
+
+void ofApp::setupGui (){
+    
+    gui.setup("Parameters");
+    gui.setPosition(0,200);
+    
+    paramsGroup1.setName("Group 1");
+    
+    //paramsGroup1.add(pShow[0].set( "Show/Hide", true ));
+    paramsGroup1.add(pColorR.set( "R", 128, 0, 255 ));
+    paramsGroup1.add(pColorG.set( "G", 128, 0, 255 ));
+    paramsGroup1.add(pColorB.set("B", 128, 0, 255 ));
+    paramsGroup1.add(pMultiplier.set("Multiply", 1, 1, 50));
+    paramsGroup1.add(pDivider.set("Divide", 1, 1, 10));
+    paramsGroup1.add(pBrightness.set("Brightness", 128, 0, 255));
+
+    // paramsGroup1.add(pJitterScale[0].set("Jitter scale", true));
+    
+    gui.add(paramsGroup1);
+    
+}
+
+
 
 //exposureMeteringMode.setName(exposureMeteringModes[value]);
 //display the preset name in the UI
