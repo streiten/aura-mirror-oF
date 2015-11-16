@@ -178,7 +178,7 @@ void ofApp::draw(){
         //threshold(frame,frameProcessed,thresh,255,0);
         //drawMat(frameProcessed,320,0);
         drawMat(frame,0,0);
-        finder.draw();
+        // finder.draw();
     }
     #else
         cam.draw(0, 0);
@@ -211,15 +211,15 @@ void ofApp::draw(){
         ofRectangle object = finder.getObjectSmoothed(i);
         // sunglasses.setAnchorPercent(.5, .5);
         //float scaleAmount = .85 * object.width / sunglasses.getWidth();
-        ofPushMatrix();
+        //ofPushMatrix();
         // ofTranslate(object.x + object.width / 2., object.y + object.height * .42);
         //ofScale(scaleAmount, scaleAmount);
         //sunglasses.draw(0, 0);
-        ofPopMatrix();
-        ofPushMatrix();
-        ofTranslate(object.getPosition());
+        //ofPopMatrix();
+        //ofPushMatrix();
+        //ofTranslate(object.getPosition());
         ofDrawBitmapStringHighlight(ofToString(finder.getLabel(i)), 0, 0);
-        ofDrawLine(ofVec2f(), toOf(finder.getVelocity(i)) * 10);
+        //ofDrawLine(ofVec2f(), toOf(finder.getVelocity(i)) * 10);
         ofPopMatrix();
     }
     
