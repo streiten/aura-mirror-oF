@@ -7,7 +7,7 @@
 
 #include "ConsoleListener.h"
 #include "auraAnimations.h"
-#include "auraDisplay.h"
+// #include "auraDisplay.h"
 
 
 #ifdef __arm__
