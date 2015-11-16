@@ -8,7 +8,11 @@ using namespace cv;
     Mat frame,frameProcessed;
 #endif
 
+// States: IDLE, Inprogress
 
+// animations shift / scale / rotate / fade / brightness
+// parameters: face size / closeup - general movement
+// averages... really really slow kenburns... 
 
 //--------------------------------------------------------------
 void ofApp::setup(){
@@ -39,17 +43,46 @@ void ofApp::setup(){
     
     // Cam & Facedetection
     finder.setPreset(ObjectFinder::Fast);
+    finder.getTracker().setSmoothingRate(0.05);
 
     #ifdef __arm__
         finder.setup("haarcascade_frontalface_alt2.xml");
-        cam.setup(320,240,true);//setup camera (w,h,color = true,gray = false);
+        cam.setup(640,480,false);//setup camera (w,h,color = true,gray = false);
         cam.setFlips(false,true);
     #else
+        cam.videoSettings();
         cam.setup(640,480);
         finder.setup("haarcascade_frontalface_default.xml");
-    #endif
 
+    #endif
+    
+    // background.setLearningTime(900);
+    // background.setThresholdValue(20);
+    
+    // deprc...
     thresh = 127;
+    
+    // The Aura Imagery
+    ofEnableAlphaBlending();
+    dir.listDir("auras/");
+    dir.sort(); // in linux the file system doesn't return file lists ordered in alphabetical order
+    ofDisableAntiAliasing();
+    ofDisableSmoothing();
+    
+    //allocate the vector to have as many ofImages as files
+    if( dir.size() ){
+        images.assign(dir.size(), ofImage());
+    }
+    
+    // you can now iterate through the files and load them into the ofImage vector
+    for(int i = 0; i < (int)dir.size(); i++){
+        images[i].loadImage(dir.getPath(i));
+    }
+    currentImage = 0;
+    
+    // matrixOverlay.loadImage("radialoveray.png");
+    
+    ofBackground(ofColor::white);
 
 }
 
@@ -65,6 +98,8 @@ void ofApp::update(){
         cam.update();
         if(cam.isFrameNew()) {
             finder.update(cam);
+            // background.update(cam, thresholded);
+            // thresholded.update();
         }
     #endif
     
@@ -77,6 +112,9 @@ void ofApp::update(){
     if (bSendSerialMessage){
         sendCommandToMirror('X');
     }
+    
+    // unsigned char * pixelsA = myImg.getPixels();
+
 }
 
 //--------------------------------------------------------------
@@ -91,6 +129,7 @@ void ofApp::draw(){
     }
     #else
         cam.draw(0, 0);
+        thresholded.draw(640, 0);
     #endif
     finder.draw();
     
@@ -114,6 +153,25 @@ void ofApp::draw(){
     
     ofDrawBitmapStringHighlight(ofToString((int) ofGetFrameRate()) + "fps", 10, 20);
     ofDrawBitmapStringHighlight(ofToString(finder.size()), 10, 40);
+
+    for(int i = 0; i < finder.size(); i++) {
+        ofRectangle object = finder.getObjectSmoothed(i);
+        // sunglasses.setAnchorPercent(.5, .5);
+        //float scaleAmount = .85 * object.width / sunglasses.getWidth();
+        ofPushMatrix();
+        ofTranslate(object.x + object.width / 2., object.y + object.height * .42);
+        //ofScale(scaleAmount, scaleAmount);
+        //sunglasses.draw(0, 0);
+        ofPopMatrix();
+        ofPushMatrix();
+        ofTranslate(object.getPosition());
+        ofDrawBitmapStringHighlight(ofToString(finder.getLabel(i)), 0, 0);
+        ofDrawLine(ofVec2f(), toOf(finder.getVelocity(i)) * 10);
+        ofPopMatrix();
+    }
+    
+    images[currentImage].draw(ofGetWidth()-100,0,100,100);
+    matrixOverlay.draw(ofGetWidth()-300,0,300,300);
 
 }
 
@@ -163,11 +221,13 @@ void ofApp::drawMatrix() {
             
             int x = jNew*10+5;
             int y = i*20+5;
+            
             ofPushStyle();
             ofFill();
             ofSetColor(pixelStrip[k]);
             ofDrawRectangle(x,y,10,10);
             ofPopStyle();
+            
             k++;
             
             if(debug) {
@@ -189,8 +249,18 @@ void ofApp::drawStrip() {
     }
 }
 
-
 void ofApp::generateMirrorFrame() {
+    
+    
+    for(int i = 0; i < 10; i++){
+        for(int j=0; j < 10;j++){
+            pixelMatrix[i][j] = images[currentImage].getPixelsRef().getColor(i, j);
+        }
+    }
+}
+
+
+void ofApp::generateMirrorTestFrame() {
 
     float hue = fmodf(ofGetElapsedTimef()*100,255);
     // float brightness = ofMap(mouseX, 0, 800, 0, 255);
@@ -239,7 +309,17 @@ void ofApp::keyPressed(int key){
     if(key == 'c') { activePiCamSetting = 2 ;}
     if(key == 'b') { activePiCamSetting = 3 ;}
     if(key == 't') { activePiCamSetting = 4 ;}
-
+    
+    if(key == 'i') {
+        if (dir.size() > 0){
+            currentImage++;
+            currentImage %= dir.size();
+        }
+    }
+    
+    if(key == ' ') {
+        background.reset();
+    }
 }
 
 //--------------------------------------------------------------

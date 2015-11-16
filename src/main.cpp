@@ -5,7 +5,12 @@
 int main( ){
 
     ofSetLogLevel(OF_LOG_VERBOSE);
-    ofSetupOpenGL(640,480,OF_WINDOW);			// <-------- setup the GL context
-	ofRunApp(new ofApp());
+    #ifdef __arm__
+        ofSetupOpenGL(640,480,OF_WINDOW);			// <-------- setup the GL context
+    #else
+        ofSetupOpenGL(640,480,OF_WINDOW);			// <-------- setup the GL context
+    #endif
+	
+    ofRunApp(new ofApp());
 
 }

@@ -34,7 +34,9 @@ public:
     ofColor pixelStrip[200];
     void generateStripData();
     
+    void generateMirrorTestFrame();
     void generateMirrorFrame();
+
     void sendFrameToMirror();
     
     bool display_on = true;
@@ -84,13 +86,23 @@ public:
     #else
         ofVideoGrabber cam;
     #endif
-
+    
+    // Facedetection & Background substraction
     ofxCv::ObjectFinder finder;
+    ofxCv::RunningBackground background;
+    ofImage thresholded;
 
     ConsoleListener consoleListener;
     void onCharacterReceived(SSHKeyListenerEventData& e);
     
     void sendCommandToMirror(unsigned char cmd);
+    
+    // the arua images 
+    ofDirectory dir;
+    vector<ofImage> images;
+    ofImage matrixOverlay;
+    
+    int currentImage;
     
     
 };
