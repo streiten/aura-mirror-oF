@@ -23,7 +23,10 @@ void ofApp::setup(){
     ofBackground(0, 0, 0);
     //ofSetVerticalSync(true);
     //ofSetFrameRate(120);
-    
+    delay = 3000;
+    last_time = ofGetElapsedTimeMillis();
+
+
     consoleListener.setup(this);
     consoleListener.startThread(false, false);
     
@@ -66,8 +69,8 @@ void ofApp::setup(){
     ofEnableAlphaBlending();
     dir.listDir("auras/");
     dir.sort(); // in linux the file system doesn't return file lists ordered in alphabetical order
-    ofDisableAntiAliasing();
-    ofDisableSmoothing();
+    //ofDisableAntiAliasing();
+    //ofDisableSmoothing();
     
     //allocate the vector to have as many ofImages as files
     if( dir.size() ){
@@ -83,6 +86,7 @@ void ofApp::setup(){
     // matrixOverlay.loadImage("radialoveray.png");
     
     ofBackground(ofColor::white);
+    sceneSparkle();
 
 }
 
@@ -103,7 +107,15 @@ void ofApp::update(){
         }
     #endif
     
-    generateMirrorFrame();
+    // generateMirrorFrame();
+    
+    if( ofGetElapsedTimeMillis() - last_time > delay ) {
+        last_time = ofGetElapsedTimeMillis();
+        sceneSparkle();
+    }
+    
+    // float hue = fmodf(ofGetElapsedTimef()*10,255);
+
     sendFrameToMirror();
        
     // img.update();
@@ -139,17 +151,17 @@ void ofApp::draw(){
     // drawStrip();
     // img.draw(0, 0,100,100);
     
-    if(finder.size() > 0) {
-        if(display_on){
-            sendCommandToMirror('X');
-            display_on = false;
-        }
-    } else {
-        if(!display_on){
-            sendCommandToMirror('X');
-            display_on = true;
-        }
-    }
+//    if(finder.size() > 0) {
+//        if(display_on){
+//            sendCommandToMirror('X');
+//            display_on = false;
+//        }
+//    } else {
+//        if(!display_on){
+//            sendCommandToMirror('X');
+//            display_on = true;
+//        }
+//    }
     
     ofDrawBitmapStringHighlight(ofToString((int) ofGetFrameRate()) + "fps", 10, 20);
     ofDrawBitmapStringHighlight(ofToString(finder.size()), 10, 40);
@@ -159,7 +171,7 @@ void ofApp::draw(){
         // sunglasses.setAnchorPercent(.5, .5);
         //float scaleAmount = .85 * object.width / sunglasses.getWidth();
         ofPushMatrix();
-        ofTranslate(object.x + object.width / 2., object.y + object.height * .42);
+        // ofTranslate(object.x + object.width / 2., object.y + object.height * .42);
         //ofScale(scaleAmount, scaleAmount);
         //sunglasses.draw(0, 0);
         ofPopMatrix();
@@ -171,9 +183,40 @@ void ofApp::draw(){
     }
     
     images[currentImage].draw(ofGetWidth()-100,0,100,100);
-    matrixOverlay.draw(ofGetWidth()-300,0,300,300);
+    // matrixOverlay.draw(ofGetWidth()-300,0,300,300);
 
 }
+
+
+void ofApp::sceneSparkle(){
+    
+    ofColor c;
+    // Chose a random pixel and slowly pulse
+    
+    int randIndexI = (int) ofRandom(10);
+    int randIndexJ = (int) ofRandom(10);
+
+    c.set(0, 0, 0);
+    for(int i = 0; i < 10; i++){
+        for(int j=0; j < 10;j++){
+            pixelMatrix[i][j] = c;
+        }
+    }
+    c.set(128,128,128);
+    pixelMatrix[randIndexI][randIndexJ ] = c;
+    
+};
+
+void ofApp::sceneMirror(){
+
+};
+
+void ofApp::sceneTransition(){
+
+};
+
+
+// +++ DISPLAY FUNCTIONS +++
 
 
 void ofApp::generateStripData() {
@@ -292,6 +335,9 @@ void ofApp::sendFrameToMirror() {
         serial.writeBytes(&serialOutBuffer[0],301);
     }
 }
+
+
+// +++ SSH Key Input +++
 
 void ofApp::onCharacterReceived(SSHKeyListenerEventData& e)
 {

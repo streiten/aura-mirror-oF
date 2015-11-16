@@ -3,6 +3,7 @@
 #include "ofMain.h"
 #include "ofxCv.h"
 #include "ConsoleListener.h"
+// #include "auraDisplay.h"
 
 #ifdef __arm__
     #include "ofxCvPiCam.h"
@@ -33,16 +34,15 @@ public:
     ofColor pixelMatrix[10][10];
     ofColor pixelStrip[200];
     void generateStripData();
-    
+
     void generateMirrorTestFrame();
     void generateMirrorFrame();
 
     void sendFrameToMirror();
-    
     bool display_on = true;
+    int matrixStyle;
     
     bool debug;
-    int matrixStyle;
     
     ofSerial    serial;
     
@@ -104,5 +104,15 @@ public:
     
     int currentImage;
     
+    // Scenes
     
+    void sceneSparkle();
+    void sceneMirror();
+    void sceneTransition();
+    
+    // Animations
+    int delay;
+    int last_time;
+    
+
 };
