@@ -17,8 +17,10 @@ public:
     
     int delay;
     int last_time;
+    bool autoReset;
     
-    void set(int millis);
+    void set(int millis, bool autoReset);
+    int get();
     bool check();
     void reset();
     

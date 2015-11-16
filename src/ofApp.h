@@ -106,7 +106,7 @@ public:
     // the arua images 
     ofDirectory dir;
     vector<ofImage> images;
-    ofImage matrixOverlay;
+    // ofImage matrixOverlay;
     
     int currentImage;
     
@@ -115,6 +115,9 @@ public:
     
     auraTimer sparkleTimer;
     auraTimer shiftTimer;
+    auraTimer presentTimer;
+    bool personPresent;
+    float personBrightness;
     
     void sceneSparkle();
     void sceneMirror();

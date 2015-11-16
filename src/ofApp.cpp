@@ -91,8 +91,12 @@ void ofApp::setup(){
     
     shiftIndex = 0;
     
-    sparkleTimer.set(3000);
-    shiftTimer.set(500);
+    sparkleTimer.set(1000,true);
+    shiftTimer.set(500,true);
+    presentTimer.set(2000,false);
+    
+    personPresent = false;
+    personBrightness = 128;
     
     sceneSparkle();
     
@@ -122,6 +126,15 @@ void ofApp::update(){
         }
     #endif
     
+    if(finder.size() > 0) {
+        presentTimer.reset();
+        personPresent = true;
+    }
+    
+    if(presentTimer.check()) {
+        personPresent = false;
+    }
+    
     shift.update(1.0f/100);
     sparklePulse.update(1.0f/700);
 
@@ -132,19 +145,7 @@ void ofApp::update(){
             break;
             
         case 1:
-            
-            if( shiftTimer.check() ) {
-                generateMirrorFrame();
-
-                for(int i = 0; i < shiftIndex ;i++) {
-                    shiftMatrix(1);
-                }
-                shiftIndex++;
-                if(shiftIndex > 9) shiftIndex = 0;
-            }
-            
-            setMirrorFrameBrightness(pBrightness);
-
+            sceneMirror();
             break;
             
         case 2:
@@ -204,27 +205,31 @@ void ofApp::draw(){
 //        }
 //    }
     
-    ofDrawBitmapStringHighlight(ofToString((int) ofGetFrameRate()) + "fps", 10, 20);
-    ofDrawBitmapStringHighlight(ofToString(finder.size()), 10, 40);
+
 
     for(int i = 0; i < finder.size(); i++) {
         ofRectangle object = finder.getObjectSmoothed(i);
-        // sunglasses.setAnchorPercent(.5, .5);
-        //float scaleAmount = .85 * object.width / sunglasses.getWidth();
-        //ofPushMatrix();
-        // ofTranslate(object.x + object.width / 2., object.y + object.height * .42);
-        //ofScale(scaleAmount, scaleAmount);
-        //sunglasses.draw(0, 0);
-        //ofPopMatrix();
-        //ofPushMatrix();
-        //ofTranslate(object.getPosition());
-        ofDrawBitmapStringHighlight(ofToString(finder.getLabel(i)), 0, 0);
-        //ofDrawLine(ofVec2f(), toOf(finder.getVelocity(i)) * 10);
-        ofPopMatrix();
+        String s = "Tracker width:" + ofToString(object.height) + " X: " + ofToString(object.x) + " Y: " +  ofToString(object.y);
+        ofDrawBitmapStringHighlight(s , 210, 70);
+        // ofDrawBitmapStringHighlight(ofToString(finder.getLabel(i)), 210, 0);
     }
     
-    images[currentImage].draw(ofGetWidth()-100,0,100,100);
+    // images[currentImage].draw(ofGetWidth()-100,0,100,100);
     // matrixOverlay.draw(ofGetWidth()-300,0,300,300);
+    
+    ofDrawBitmapStringHighlight(ofToString((int) ofGetFrameRate()) + "fps", 10, 20);
+    ofDrawBitmapStringHighlight(ofToString(finder.size()), 10, 40);
+    
+    if(finder.size() > 0) {
+        ofDrawBitmapStringHighlight("Present",210, 10);
+    }
+    
+    if(personPresent){
+        ofDrawBitmapStringHighlight("Present smooth",210, 30);
+    }
+    
+    ofDrawBitmapStringHighlight("Calculated Brightness: "+ ofToString(personBrightness), 210, 50);
+
     
     gui.draw();
 
@@ -237,10 +242,10 @@ void ofApp::sceneSparkle(){
         0,0,0,0,0,0,0,0,0,0,
         0,0,0,0,0,0,0,0,0,0,
         0,0,0,0,0,0,0,0,0,0,
-        0,0,0,0,0,1,0,0,0,0,
-        0,0,0,0,1,0,0,0,0,0,
+        0,0,0,0,0,0,0,0,0,0,
         0,0,0,0,1,1,0,0,0,0,
-        0,0,0,1,0,0,0,0,0,0,
+        0,0,0,0,1,1,0,0,0,0,
+        0,0,0,0,0,0,0,0,0,0,
         0,0,0,0,0,0,0,0,0,0,
         0,0,0,0,0,0,0,0,0,0,
         0,0,0,0,0,0,0,0,0,0
@@ -260,6 +265,51 @@ void ofApp::sceneSparkle(){
 
 };
 
+
+void ofApp::sceneMirror(){
+    
+    int k = 0;
+    int setMatrix[] = {
+        0,0,0,1,1,1,1,0,0,0,
+        0,0,1,1,1,1,1,1,0,0,
+        0,1,1,1,1,1,1,1,1,0,
+        1,1,1,1,1,1,1,1,1,1,
+        1,1,1,1,1,1,1,1,1,1,
+        1,1,1,1,1,1,1,1,1,1,
+        1,1,1,1,1,1,1,1,1,1,
+        0,1,1,1,1,1,1,1,1,0,
+        0,0,1,1,1,1,1,1,0,0,
+        0,0,0,1,1,1,1,0,0,0
+    };
+    
+    if( shiftTimer.check() ) {
+        
+        generateMirrorFrame();
+        
+        for(int i = 0; i < shiftIndex ;i++) {
+            shiftMatrix(1);
+        }
+        shiftIndex++;
+        if(shiftIndex > 9) shiftIndex = 0;
+    }
+    
+    for(int i = 0; i < finder.size(); i++) {
+        ofRectangle person = finder.getObjectSmoothed(i);
+        personBrightness = ofMap(person.width, 140, 300, 0, 255,true);
+    }
+    
+    setMirrorFrameBrightness(personBrightness);
+    
+    for(int i = 0; i < 10; i++){
+        for(int j=0; j < 10;j++){
+            if(setMatrix[k] == 0 ){
+                pixelMatrix[i][j] = ofColor(0,0,0);
+            }
+            k++;
+        }
+    }
+
+};
 
 
 // +++ DISPLAY FUNCTIONS +++
