@@ -60,7 +60,6 @@ public:
     
     ofImage img;
     int thresh;
-    int activePiCamSetting;
 
     #ifdef __arm__
         ofxCvPiCam cam;
@@ -123,11 +122,14 @@ public:
     void sceneMirror();
     void sceneTransition();
     
+    ofxAnimatableFloat shift;
+    ofxAnimatableFloat sparklePulse;
+    
     // ofColor pixelMatrix;
     int sceneIndex;
     int sceneCount;
     
-    // GUI
+    // GUI & Settings
     void setupGui();
     ofxPanel gui;
     ofParameterGroup paramsGroup1;
@@ -136,9 +138,17 @@ public:
     ofParameter<float> pColorB;
     ofParameter<int> pMultiplier;
     ofParameter<int> pDivider;
+    
+    ofParameter<int> pBrightnessMin;
+    ofParameter<int> pBrightnessMax;
     ofParameter<int> pBrightness;
     
-    ofxAnimatableFloat shift;
-    ofxAnimatableFloat sparklePulse;
+    ofParameter<int> pPiCamBrightness;
+    ofParameter<int> pPiCamContrast;
+    
+    void pPiCamBrightnessChanged(int & pPiCamBrightness);
+    void pPiCamContrastChanged(int & pPiCamContrast);
+    
+    int activeSettingParam;
 
 };

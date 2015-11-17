@@ -78,7 +78,7 @@ void ofApp::setup(){
     for(int i = 0; i < (int)dir.size(); i++){
         images[i].loadImage(dir.getPath(i));
     }
-    
+    ofSetLogLevel(OF_LOG_ERROR);
     currentImage = 0;
     
     // matrixOverlay.loadImage("radialoveray.png");
@@ -214,7 +214,7 @@ void ofApp::draw(){
         // ofDrawBitmapStringHighlight(ofToString(finder.getLabel(i)), 210, 0);
     }
     
-    // images[currentImage].draw(ofGetWidth()-100,0,100,100);
+    images[currentImage].draw(ofGetWidth()-100,0,100,100);
     // matrixOverlay.draw(ofGetWidth()-300,0,300,300);
     
     ofDrawBitmapStringHighlight(ofToString((int) ofGetFrameRate()) + "fps", 10, 20);
@@ -295,7 +295,7 @@ void ofApp::sceneMirror(){
     
     for(int i = 0; i < finder.size(); i++) {
         ofRectangle person = finder.getObjectSmoothed(i);
-        personBrightness = ofMap(person.width, 140, 300, 0, 255,true);
+        personBrightness = ofMap(person.width, pBrightnessMin, pBrightnessMax, 0, 255,true);
     }
     
     setMirrorFrameBrightness(personBrightness);
@@ -467,9 +467,7 @@ void ofApp::sendFrameToMirror() {
     }
 }
 
-
 // +++ SSH Key Input +++
-
 void ofApp::onCharacterReceived(SSHKeyListenerEventData& e)
 {
     keyPressed((int)e.character);
@@ -478,28 +476,95 @@ void ofApp::onCharacterReceived(SSHKeyListenerEventData& e)
 //--------------------------------------------------------------
 void ofApp::keyPressed(int key){
     
-    ofLogVerbose() << "keyPressed: " << key;
-    if(key == 's') { activePiCamSetting = 0 ;}
-    if(key == 'S') { activePiCamSetting = 1 ;}
-    if(key == 'c') { activePiCamSetting = 2 ;}
-    if(key == 'b') { activePiCamSetting = 3 ;}
-    if(key == 't') { activePiCamSetting = 4 ;}
+    if(key == 'q') { activeSettingParam = 1 ;}
+    if(key == 'w') { activeSettingParam = 2 ;}
     
-    if(key == 'i') {
-        if (dir.size() > 0){
-            currentImage++;
-            currentImage %= dir.size();
-        }
+    if(key == 'b') { activeSettingParam = 3 ;}
+    if(key == 'c') { activeSettingParam = 4 ;}
+    
+    if(key == 's'){
+        gui.saveToFile("settings.xml");
+        cout << "Settings saved" << endl;
+    }
+    if(key == 'l'){
+        gui.loadFromFile("settings.xml");
+        cout << "Settings loaded" << endl;
     }
     
     if(key == 'o') {
         sceneIndex++;
         sceneIndex %= sceneCount;
-       
+        cout << "Sceneindex: " << sceneIndex << endl;
     }
     
-    if(key == ' ') {
-        background.reset();
+    if(key == 'i') {
+        if (dir.size() > 0){
+            currentImage++;
+            currentImage %= dir.size();
+            cout << "Image Index: " << currentImage << endl;
+        }
+    }
+    
+    if(key == '+') {
+        
+        if(activeSettingParam == 1) {
+            if(pBrightnessMin < 300) {
+                pBrightnessMin += 5;
+                cout << "pBrightnessMin: " << pBrightnessMin << endl;
+            }
+        }
+        if(activeSettingParam == 2) {
+            if(pBrightnessMax < 300) {
+                pBrightnessMax += 5;
+                cout << "pBrightnessMax: " << pBrightnessMax << endl;
+            }
+        }
+        
+        if(activeSettingParam == 3) {
+            if(pPiCamBrightness < 100) {
+                pPiCamBrightness += 5;
+                cout << "pPiCamBrightness: " << pPiCamBrightness << endl;
+            }
+        }
+        if(activeSettingParam == 4) {
+            if(pPiCamContrast < 100) {
+                pPiCamContrast += 5;
+                cout << "pPiCamContrast: " << pPiCamContrast << endl;
+            }
+        }
+    }
+    
+    if(key == '-') {
+        
+        if(activeSettingParam == 1) {
+            if(pBrightnessMin > 140) {
+                pBrightnessMin -= 5;
+                cout << "pBrightnessMin: " << pBrightnessMin << endl;
+                
+            }
+        }
+        if(activeSettingParam == 2) {
+            if(pBrightnessMax > 140) {
+                pBrightnessMax -= 5;
+                cout << "pBrightnessMax: " << pBrightnessMax << endl;
+                
+            }
+        }
+
+        if(activeSettingParam == 3) {
+            if(pPiCamBrightness > 0) {
+                pPiCamBrightness -= 5;
+                cout << "pPiCamBrightness: " << pPiCamBrightness << endl;
+
+            }
+        }
+        if(activeSettingParam == 4) {
+            if(pPiCamContrast > 0) {
+                pPiCamContrast -= 5;
+                cout << "pPiCamContrast: " << pPiCamContrast << endl;
+
+            }
+        }
     }
 }
 
@@ -517,11 +582,9 @@ void ofApp::mouseMoved(int x, int y ){
 void ofApp::mouseDragged(int x, int y, int button){
         
     #ifdef __arm__
-        if( activePiCamSetting == 0 ) { cam.setSaturation(ofMap(x,0,ofGetWidth(),-100,100));}
-        if( activePiCamSetting == 1 ) { cam.setSharpness(ofMap(x,0,ofGetWidth(),-100,100));}
-        if( activePiCamSetting == 2 ) { cam.setContrast(ofMap(x,0,ofGetWidth(),-100,100));}
-        if( activePiCamSetting == 3 ) { cam.setBrightness(ofMap(x,0,ofGetWidth(),0,100));}
-        if( activePiCamSetting == 4 ) { thresh = ofMap(x,0,ofGetWidth(),0,255); }
+        // if( activePiCamSetting == 0 ) { cam.setSaturation(ofMap(x,0,ofGetWidth(),-100,100));}
+        // if( activePiCamSetting == 1 ) { cam.setSharpness(ofMap(x,0,ofGetWidth(),-100,100));}
+        // if( activePiCamSetting == 4 ) { thresh = ofMap(x,0,ofGetWidth(),0,255); }
     #endif
 
     //cam.setISO(value);
@@ -590,22 +653,44 @@ void ofApp::setupGui (){
     gui.setup("Parameters");
     gui.setPosition(0,200);
     
-    paramsGroup1.setName("Group 1");
+    paramsGroup1.setName("Settings");
     
-    //paramsGroup1.add(pShow[0].set( "Show/Hide", true ));
-    paramsGroup1.add(pColorR.set( "R", 128, 0, 255 ));
-    paramsGroup1.add(pColorG.set( "G", 128, 0, 255 ));
-    paramsGroup1.add(pColorB.set("B", 128, 0, 255 ));
-    paramsGroup1.add(pMultiplier.set("Multiply", 1, 1, 50));
-    paramsGroup1.add(pDivider.set("Divide", 1, 1, 10));
-    paramsGroup1.add(pBrightness.set("Brightness", 128, 0, 255));
+//    paramsGroup1.add(pShow[0].set( "Show/Hide", true ));
+//    paramsGroup1.add(pColorR.set( "R", 128, 0, 255 ));
+//    paramsGroup1.add(pColorG.set( "G", 128, 0, 255 ));
+//    paramsGroup1.add(pColorB.set("B", 128, 0, 255 ));
+//    paramsGroup1.add(pMultiplier.set("Multiply", 1, 1, 50));
+//    paramsGroup1.add(pDivider.set("Divide", 1, 1, 10));
+//    paramsGroup1.add(pBrightness.set("Brightness", 128, 0, 255));
+    
+    paramsGroup1.add(pBrightnessMin.set("Brightness Min", 140, 0, 300));
+    paramsGroup1.add(pBrightnessMax.set("Brightness Max", 250, 140, 300));
+    
+    paramsGroup1.add(pPiCamBrightness.set("PiCam Brightness", 50, 0, 100));
+    paramsGroup1.add(pPiCamContrast.set("PiCam Contrast", 50, 0, 100));
 
     // paramsGroup1.add(pJitterScale[0].set("Jitter scale", true));
     
     gui.add(paramsGroup1);
-    
+   
+    gui.loadFromFile("settings.xml");
+
 }
 
+
+//--------------------------------------------------------------
+void ofApp::pPiCamBrightnessChanged(int & pPiCamBrightness){
+#ifdef __arm__
+    cam.setBrightness(pPiCamBrightness);
+#endif
+}
+
+//--------------------------------------------------------------
+void ofApp::pPiCamContrastChanged(int & pPiCamContrast){
+#ifdef __arm__
+    cam.setContrast(pPiCamContrast);
+#endif
+}
 
 
 //exposureMeteringMode.setName(exposureMeteringModes[value]);
