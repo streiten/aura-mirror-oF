@@ -262,7 +262,7 @@ void ofApp::setupGui (){
     paramsGroup1.add(pPiCamBrightness.set("PiCam Brightness", 50, 0, 100));
     paramsGroup1.add(pPiCamContrast.set("PiCam Contrast", 50, 0, 100));
 
-    paramsGroup1.add(pPiCamISO.set("ISO",300,100,800));
+//    paramsGroup1.add(pPiCamISO.set("ISO",300,100,800));
     paramsGroup1.add(pPiCamExposureMeteringMode.set("PiCam Metering Mode", 0,0,4));
     paramsGroup1.add(pPiCamExposureCompensation.set("PiCam Exposure Compensation", 0,-10,10));
     paramsGroup1.add(pPiCamExposureMode.set("PiCam Exposure Mode", 0,0,13));
@@ -270,17 +270,19 @@ void ofApp::setupGui (){
     paramsGroup1.add(pPiCamRoiY.set("ROI y",0,0,1));
     paramsGroup1.add(pPiCamRoiW.set("ROI w",1,0,1));
     paramsGroup1.add(pPiCamRoiH.set("ROI h",1,0,1));
+    paramsGroup1.add(pPiCamImageFX.set("image effect",0,0,23));
+
     
     pPiCamISO.addListener(this,&ofApp::pPiCamISOChanged);
     pPiCamExposureCompensation.addListener(this,&ofApp::pPiCamExposureCompensationChanged);
     pPiCamExposureMeteringMode.addListener(this,&ofApp::pPiCamExposureMeteringModeChanged);
     pPiCamExposureMode.addListener(this,&ofApp::pPiCamExposureModeChanged);
-    
     pPiCamRoiX.addListener(this,&ofApp::pPiCamRoiXChanged);
     pPiCamRoiY.addListener(this,&ofApp::pPiCamRoiYChanged);
     pPiCamRoiW.addListener(this,&ofApp::pPiCamRoiWChanged);
     pPiCamRoiH.addListener(this,&ofApp::pPiCamRoiHChanged);
-    
+    pPiCamImageFX.addListener(this,&ofApp::pPiCamImageFXChanged);
+
     PiCamExposureMeteringModes[0] = "average";
     PiCamExposureMeteringModes[1] = "spot";
     PiCamExposureMeteringModes[2] = "backlit";
@@ -302,7 +304,30 @@ void ofApp::setupGui (){
     PiCamExposureModes[12] = "fireworks";
     PiCamExposureModes[13] = "max";
     
-    // paramsGroup1.add(pJitterScale[0].set("Jitter scale", true));
+    PiCamImageFXLabels[ 0] = "none";
+    PiCamImageFXLabels[ 1] = "negative";
+    PiCamImageFXLabels[ 2] = "solarize";
+    PiCamImageFXLabels[ 3] = "posterize";
+    PiCamImageFXLabels[ 4] = "whiteboard";
+    PiCamImageFXLabels[ 5] = "blackboard";
+    PiCamImageFXLabels[ 6] = "sketch";
+    PiCamImageFXLabels[ 7] = "denoise";
+    PiCamImageFXLabels[ 8] = "emboss";
+    PiCamImageFXLabels[ 9] = "oilpaint";
+    PiCamImageFXLabels[10] = "hatch";
+    PiCamImageFXLabels[11] = "gpen";
+    PiCamImageFXLabels[12] = "pastel";
+    PiCamImageFXLabels[13] = "whatercolour";
+    PiCamImageFXLabels[14] = "film";
+    PiCamImageFXLabels[15] = "blur";
+    PiCamImageFXLabels[16] = "saturation";
+    PiCamImageFXLabels[17] = "colour swap";
+    PiCamImageFXLabels[18] = "washedout";
+    PiCamImageFXLabels[19] = "posterize";
+    PiCamImageFXLabels[20] = "colour point";
+    PiCamImageFXLabels[21] = "colour balance";
+    PiCamImageFXLabels[22] = "cartoon";
+    PiCamImageFXLabels[23] = "max";
     
     gui.add(paramsGroup1);
     
@@ -395,6 +420,17 @@ void ofApp::pPiCamRoiHChanged(float &value){
     cout << "pPiRoiH Event Handler Bang " << value << endl;
 
 }
+
+
+void ofApp::pPiCamImageFXChanged(int &value){
+    pPiCamImageFX.setName(PiCamImageFXLabels[value]);//display the preset name in the UI
+#ifdef __arm__
+    if(value == imageFX.getMax()) value = MMAL_PARAM_IMAGEFX_MAX;//the preset max value is different from the UI
+    cam.setImageFX((MMAL_PARAM_IMAGEFX_T)value);
+#endif
+    
+}
+
 
 // +++ SSH Key Input +++
 void ofApp::onCharacterReceived(SSHKeyListenerEventData& e)

@@ -66,6 +66,8 @@ public:
     ofParameter<float> pPiCamRoiY;
     ofParameter<float> pPiCamRoiW;
     ofParameter<float> pPiCamRoiH;
+    ofParameter<int> pPiCamImageFX;
+
     
     void pPiCamBrightnessChanged(int &value);
     void pPiCamContrastChanged(int &value);
@@ -78,24 +80,25 @@ public:
     void pPiCamExposureModeChanged(int &value);
     void pPiCamExposureCompensationChanged(int &value);
     void pPiCamISOChanged(int &value);
+    void pPiCamImageFXChanged(int &value);
+
     
     ofRectangle ROI;
     string PiCamExposureModes[14];
     string PiCamExposureMeteringModes[5];
+    string PiCamImageFXLabels[24];
+
     
     int activeSettingParam;
     
     void generateMirrorTestFrame();
-    
     void drawLEDMatrix(ofColor pixelMatrix[][10]);
     void sendFrameToMirror(ofColor pixelMatrix[][10]);
                         
     bool display_on = true;
-                        
     
     // SERIAL
     ofSerial    serial;
-    
     bool		bSendSerialMessage;			// a flag for sending serial
     char		bytesRead[255];				// data from serial, we will be trying to read 255
     char		bytesReadString[256];			// a string needs a null terminator, so we need 255 + 1 bytes
@@ -107,41 +110,6 @@ public:
     // CAM
     #ifdef __arm__
         ofxCvPiCam cam;
-        int PiCam_saturation;
-        int PiCam_sharpness;
-        int PiCam_contrast;
-        int PiCam_brightness;
-        int PiCam_ISO;
-        bool PiCam_vstabilisation;
-        int PiCam_exposureMeteringMode;
-        int PiCam_exposureCompensation;
-        int PiCam_exposureMode;
-        int PiCam_shutterSpeed;
-        int PiCam_rotation;
-        bool PiCam_hflip;
-        bool PiCam_vflip;
-        float PiCam_roiX;
-        float PiCam_roiY;
-        float PiCam_roiW;
-        float PiCam_roiH;
-        int PiCam_awbMode;
-        float PiCam_awbGainR;
-        float PiCam_awbGainB;
-        int PiCam_imageFX;
-        string PiCam_awbModes[11];
-        string PiCam_imageFXLabels[24];
-    
-    void PiCam_saturationChanged(int &value);
-    void PiCam_sharpnessChanged(int &value);
-    void PiCam_vstabilisationChanged(bool &value);
-    void PiCam_shutterSpeedChanged(int &value);
-    void PiCam_rotationChanged(int &value);
-    void PiCam_hflipChanged(bool &value);
-    void PiCam_vflipChanged(bool &value);
-    void PiCam_awbModeChanged(int &value);
-    void PiCam_awbGainRChanged(float &value);
-    void PiCam_awbGainBChanged(float &value);
-    void PiCam_imageFXChanged(int &value);
     #else
         ofVideoGrabber cam;
     #endif
