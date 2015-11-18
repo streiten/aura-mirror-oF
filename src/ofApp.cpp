@@ -104,7 +104,9 @@ void ofApp::update(){
         if(!sceneTransitionAnim.isAnimating()) {
             sceneTransitionAnim.reset();
             sceneTransitionAnim.animateTo(1);
+            
             SM.mirror.setRandomImage();
+        
         };
     } else {
         personPresentChanged = false;
@@ -132,42 +134,43 @@ void ofApp::draw(){
     
     sendFrameToMirror(SM.scenes[SM.currentScene]->pixelMatrix);
 
-    #ifdef __arm__
+    if(debug){
+        
+#ifdef __arm__
         if(!frame.empty()) {
             drawMat(frame,0,0);
         }
-    #else
+#else
         cam.draw(0, 0);
-    #endif
-    finder.draw();
-
-    drawLEDMatrix(SM.scenes[SM.currentScene]->pixelMatrix);
-
-    ofDrawRectangle(0, sceneTransitionAnim.val() * ofGetHeight() , ofGetWidth(), 2);
-    
-    for(int i = 0; i < finder.size(); i++) {
-        ofRectangle object = finder.getObjectSmoothed(i);
-        String s = "Tracker width:" + ofToString(object.height) + " X: " + ofToString(object.x) + " Y: " +  ofToString(object.y);
-        ofDrawBitmapStringHighlight(s , 210, 70);
-    }
-    
-    if(debug){
-
-        SM.mirror.getCurrentImage().draw(ofGetWidth()-100,0,100,100);
+#endif
+        finder.draw();
+        
+        for(int i = 0; i < finder.size(); i++) {
+            ofRectangle object = finder.getObjectSmoothed(i);
+            String s = "Tracker width:" + ofToString(object.height) + " X: " + ofToString(object.x) + " Y: " +  ofToString(object.y);
+            ofDrawBitmapStringHighlight(s , 210, 70);
+        }
+        
+        ofDrawRectangle(0, sceneTransitionAnim.val() * ofGetHeight() , ofGetWidth(), 2);
+        
+        drawLEDMatrix(SM.scenes[SM.currentScene]->pixelMatrix);
+        if(SM.currentScene == 1) {
+            SM.mirror.getCurrentImage().draw(ofGetWidth()-100,0,100,100);
+        }
         
         ofDrawBitmapStringHighlight(ofToString((int) ofGetFrameRate()) + "fps", 10, 20);
-        ofDrawBitmapStringHighlight(ofToString(finder.size()), 10, 40);
+//        ofDrawBitmapStringHighlight(ofToString(finder.size()), 10, 40);
         
         if(personPresent){
             ofDrawBitmapStringHighlight("Person present!",210, 30);
         }
         
-        ofDrawBitmapStringHighlight("Calculated Brightness: "+ ofToString(personBrightness), 210, 50);
+//        ofDrawBitmapStringHighlight("Calculated Brightness: "+ ofToString(personBrightness), 210, 50);
         ofDrawBitmapStringHighlight(ofToString(sceneTransitionAnim.val()), 210, 90);
         
-    }
+        gui.draw();
 
-    gui.draw();
+    }
 
 }
 
@@ -272,7 +275,7 @@ void ofApp::pPiCamBrightnessChanged(int & pPiCamBrightness){
 #ifdef __arm__
     cam.setBrightness(pPiCamBrightness);
 #endif
-    cout << "pPiCamBrightness Event Handler Bang " << pPiCamBrightness << endl;
+    cout << "pPiCamBrightness Event Handler Bang " << endl;
 }
 
 //--------------------------------------------------------------
@@ -280,7 +283,7 @@ void ofApp::pPiCamContrastChanged(int & pPiCamContrast){
 #ifdef __arm__
     cam.setContrast(pPiCamContrast);
 #endif
-    cout << "pPiCamContrast Event Handler Bang " << pPiCamBrightness << endl;
+    cout << "pPiCamContrast Event Handler Bang " << endl;
 
 }
 
