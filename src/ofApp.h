@@ -1,6 +1,8 @@
 #pragma once
 
 #include "ofMain.h"
+// #include "auraDisplay.h"
+
 #include "ofxCv.h"
 #include "ofxGui.h"
 #include "ofxAnimatableFloat.h"
@@ -8,8 +10,6 @@
 #include "ConsoleListener.h"
 #include "sceneManager.h"
 #include "utils.h"
-
-// #include "auraDisplay.h"
 
 #ifdef __arm__
     #include "ofxCvPiCam.h"

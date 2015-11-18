@@ -7,23 +7,31 @@
 //
 
 #include "scenes.h"
+#include "ofxAnimatable.h"
 
 void scene::setup() {};
 void scene::update() {};
 
 void scene::setBrightness( float brightness ) {
-//    for(int i = 0; i < 10; i++){
-//        for(int j=0; j < 10;j++){
-//            pixelMatrix[i][j].setBrightness( brightness );
-//        }
-//    }
+    for(int i = 0; i < 10; i++){
+        for(int j=0; j < 10;j++){
+            pixelMatrix[i][j].setBrightness( brightness );
+        }
+    }
 }
 
 void sceneIntro::setup(){
-    sparkleTimer.set(1000,true);
+    
+    pulse.animateTo(128);
+    pulse.setRepeatType(LOOP_BACK_AND_FORTH);
+    pulse.setCurve(EASE_IN_EASE_OUT);
+    
 };
 
 void sceneIntro::update(){
+    
+    pulse.update(1.0f / 240);
+    
     int k = 0;
     int setMatrix[] = {
         0,0,0,0,0,0,0,0,0,0,
@@ -44,7 +52,7 @@ void sceneIntro::update(){
                 pixelMatrix[i][j] = ofColor(0,0,0);
             } else {
                 pixelMatrix[i][j] = ofColor(255,255,255);
-                pixelMatrix[i][j].setBrightness(128);
+                pixelMatrix[i][j].setBrightness(pulse.val());
             };
             k++;
         }
@@ -94,6 +102,8 @@ void sceneMirror::update(){
         0,0,0,1,1,1,1,0,0,0
     };
     
+    generateMatrixFromImage();
+    
 //    if( shiftTimer.check() ) {
 //        
 //        generateMirrorFrame();
@@ -111,7 +121,6 @@ void sceneMirror::update(){
 //    }
 //    
 //    setMirrorFrameBrightness(personBrightness);
-    generateMatrixFromImage();
     
     for(int i = 0; i < 10; i++){
         for(int j=0; j < 10;j++){
@@ -149,15 +158,15 @@ void sceneMirror::shiftMatrix(int dir) {
     
 }
 
-ofImage sceneMirror::getCurrentImage(){
-    return images[currentImage];
-};
-
-void sceneMirror::setImage(){
+void sceneMirror::setRandomImage(){
     if (dir.size() > 0){
         currentImage = ofRandom(dir.size());
         cout << "Image Index: " << currentImage << endl;
     }
+};
+
+ofImage sceneMirror::getCurrentImage(){
+    return images[currentImage];
 };
 
 void sceneMirror::generateMatrixFromImage(){
@@ -169,10 +178,6 @@ void sceneMirror::generateMatrixFromImage(){
         }
     }
 };
-
-
-// void sceneMirror::draw(){
-// };
 
 
 

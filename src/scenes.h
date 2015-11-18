@@ -43,14 +43,12 @@ public:
 
 class sceneIntro : public scene {
     
-    auraTimer sparkleTimer;
-
+   ofxAnimatableFloat pulse;
+    
 public:
 
     void setup();
     void update();
-    
-    // void setBrightness(float brightness);
 
 };
 
@@ -68,7 +66,7 @@ public:
     
     void setup();
     void update();
-    void setImage();
+    void setRandomImage();
     ofImage getCurrentImage();
     
 protected:

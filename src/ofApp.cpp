@@ -19,7 +19,7 @@ using namespace cv;
 void ofApp::setup(){
     
     debug = true;
-    // ofSetLogLevel(OF_LOG_ERROR);
+    ofSetLogLevel(OF_LOG_ERROR);
     
     // General
     ofBackground(0, 0, 0);
@@ -64,10 +64,6 @@ void ofApp::setup(){
     
     SM.setup();
         
-//    sparklePulse.animateTo(BRIGHTNESS_MAX);
-//    sparklePulse.setRepeatType(LOOP_BACK_AND_FORTH);
-//    sparklePulse.setCurve(EASE_IN_EASE_OUT);
-    
     // sceneTransitionAnim.setCurve(EASE_IN_EASE_OUT);
     // sceneTransitionAnim.setRepeatType(LOOP_BACK_AND_FORTH_ONCE);
     
@@ -92,7 +88,7 @@ void ofApp::update(){
     
     
     if(finder.size() > 0) {
-        // Person Watchdog thing
+        // Person present watchdog
         presentTimer.reset();
         personPresent = true;
     }
@@ -108,34 +104,24 @@ void ofApp::update(){
         if(!sceneTransitionAnim.isAnimating()) {
             sceneTransitionAnim.reset();
             sceneTransitionAnim.animateTo(1);
+            SM.mirror.setRandomImage();
         };
-//        sparklePulse.reset();
-//        sparklePulse.animateTo(BRIGHTNESS_MAX);
     } else {
         personPresentChanged = false;
     }
-    
     personPresentLastFrame = personPresent;
-
-    // Updating the animators
-//    sparklePulse.update(1.0f/700);
     
     sceneTransitionAnim.update(1.0f/SCENE_FADE);
     
     if(sceneTransitionAnim.hasFinishedAnimating()){
         if(personPresent) {
-            //sceneIndex = 1;
+            SM.currentScene = 1;
         } else {
-            //sceneIndex = 0;
+            SM.currentScene = 0;
         }
     }
     
-    // SM.currentScene = 0;
     SM.scenes[SM.currentScene]->update();
-    
-    if (bSendSerialMessage){
-        sendCommandToMirror('X');
-    }
     
     // unsigned char * pixels = myImg.getPixels();
 
@@ -163,10 +149,8 @@ void ofApp::draw(){
         ofRectangle object = finder.getObjectSmoothed(i);
         String s = "Tracker width:" + ofToString(object.height) + " X: " + ofToString(object.x) + " Y: " +  ofToString(object.y);
         ofDrawBitmapStringHighlight(s , 210, 70);
-        // ofDrawBitmapStringHighlight(ofToString(finder.getLabel(i)), 210, 0);
     }
     
-        // draw the LED Display & serialized strip simulation
     if(debug){
 
         SM.mirror.getCurrentImage().draw(ofGetWidth()-100,0,100,100);
@@ -175,7 +159,7 @@ void ofApp::draw(){
         ofDrawBitmapStringHighlight(ofToString(finder.size()), 10, 40);
         
         if(personPresent){
-            ofDrawBitmapStringHighlight("Person present",210, 30);
+            ofDrawBitmapStringHighlight("Person present!",210, 30);
         }
         
         ofDrawBitmapStringHighlight("Calculated Brightness: "+ ofToString(personBrightness), 210, 50);
@@ -201,19 +185,6 @@ void ofApp::drawLEDMatrix(ofColor pixelMatrix[][10]) {
     }
     
 }
-
-//void ofApp::generateMirrorTestFrame() {
-//
-//    for(int i = 0; i < 10; i++){
-//        for(int j=0; j < 10;j++){
-//            pixelMatrix[i][j] = ofColor(0,0,0);
-//        }
-//    }
-//
-//    pixelMatrix[0][0] = ofColor(255,0,0);
-//    pixelMatrix[5][5] = ofColor(0,255,0);
-//    pixelMatrix[9][9] = ofColor(0,0,255);
-//}
 
 void ofApp::sendFrameToMirror(ofColor pixelMatrix[][10]) {
     if(serial.isInitialized()){
@@ -281,6 +252,9 @@ void ofApp::setupGui (){
     paramsGroup1.add(pBrightnessMin.set("Brightness Min", 140, 0, 300));
     paramsGroup1.add(pBrightnessMax.set("Brightness Max", 250, 140, 300));
     
+    pPiCamBrightness.addListener(this, &ofApp::pPiCamBrightnessChanged);
+    pPiCamContrast.addListener(this,&ofApp::pPiCamContrastChanged);
+    
     paramsGroup1.add(pPiCamBrightness.set("PiCam Brightness", 50, 0, 100));
     paramsGroup1.add(pPiCamContrast.set("PiCam Contrast", 50, 0, 100));
     
@@ -298,6 +272,7 @@ void ofApp::pPiCamBrightnessChanged(int & pPiCamBrightness){
 #ifdef __arm__
     cam.setBrightness(pPiCamBrightness);
 #endif
+    cout << "pPiCamBrightness Event Handler Bang " << pPiCamBrightness << endl;
 }
 
 //--------------------------------------------------------------
@@ -305,6 +280,8 @@ void ofApp::pPiCamContrastChanged(int & pPiCamContrast){
 #ifdef __arm__
     cam.setContrast(pPiCamContrast);
 #endif
+    cout << "pPiCamContrast Event Handler Bang " << pPiCamBrightness << endl;
+
 }
 
 
@@ -342,7 +319,7 @@ void ofApp::keyPressed(int key){
     }
     
     if(key == 'i') {
-        SM.mirror.setImage();
+        SM.mirror.setRandomImage();
     }
     
     if(key == '+') {
