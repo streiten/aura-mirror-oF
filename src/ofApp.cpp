@@ -49,7 +49,6 @@ void ofApp::setup(){
         finder.setup("haarcascade_frontalface_alt2.xml");
         cam.setup(640,480,false);//setup camera (w,h,color = true,gray = false);
         cam.setFlips(false,true);
-        cam.setISO(800);
     #else
         cam.videoSettings();
         cam.setup(640,480);
@@ -262,7 +261,7 @@ void ofApp::setupGui (){
     paramsGroup1.add(pPiCamBrightness.set("PiCam Brightness", 50, 0, 100));
     paramsGroup1.add(pPiCamContrast.set("PiCam Contrast", 50, 0, 100));
 
-//    paramsGroup1.add(pPiCamISO.set("ISO",300,100,800));
+    paramsGroup1.add(pPiCamISO.set("ISO",300,100,800));
     paramsGroup1.add(pPiCamExposureMeteringMode.set("PiCam Metering Mode", 0,0,4));
     paramsGroup1.add(pPiCamExposureCompensation.set("PiCam Exposure Compensation", 0,-10,10));
     paramsGroup1.add(pPiCamExposureMode.set("PiCam Exposure Mode", 0,0,13));
@@ -270,8 +269,7 @@ void ofApp::setupGui (){
     paramsGroup1.add(pPiCamRoiY.set("ROI y",0,0,1));
     paramsGroup1.add(pPiCamRoiW.set("ROI w",1,0,1));
     paramsGroup1.add(pPiCamRoiH.set("ROI h",1,0,1));
-    paramsGroup1.add(pPiCamImageFX.set("image effect",0,0,23));
-
+//    paramsGroup1.add(pPiCamImageFX.set("image effect",0,0,23));
     
     pPiCamISO.addListener(this,&ofApp::pPiCamISOChanged);
     pPiCamExposureCompensation.addListener(this,&ofApp::pPiCamExposureCompensationChanged);
