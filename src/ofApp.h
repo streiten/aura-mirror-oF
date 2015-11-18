@@ -6,9 +6,10 @@
 #include "ofxAnimatableFloat.h"
 
 #include "ConsoleListener.h"
-#include "auraAnimations.h"
-// #include "auraDisplay.h"
+#include "sceneManager.h"
+#include "utils.h"
 
+// #include "auraDisplay.h"
 
 #ifdef __arm__
     #include "ofxCvPiCam.h"
@@ -33,23 +34,42 @@ public:
     void dragEvent(ofDragInfo dragInfo);
     void gotMessage(ofMessage msg);
     
-    void drawMatrix();
-    void drawStrip();
-    
-    ofColor pixelMatrix[10][10];
-    ofColor pixelStrip[200];
-    void generateStripData();
-
-    void generateMirrorTestFrame();
-    void generateMirrorFrame();
-    void setMirrorFrameBrightness(float brightness);
-
-    void sendFrameToMirror();
-    bool display_on = true;
-    int matrixStyle;
-    
     bool debug;
     
+    // SSH Keystroke Capture
+    ConsoleListener consoleListener;
+    void onCharacterReceived(SSHKeyListenerEventData& e);
+    
+    // GUI & Settings
+    void setupGui();
+    ofxPanel gui;
+    ofParameterGroup paramsGroup1;
+    ofParameter<float> pColorR;
+    ofParameter<float> pColorG;
+    ofParameter<float> pColorB;
+    ofParameter<int> pMultiplier;
+    ofParameter<int> pDivider;
+    
+    ofParameter<int> pBrightnessMin;
+    ofParameter<int> pBrightnessMax;
+    ofParameter<int> pBrightness;
+    
+    ofParameter<int> pPiCamBrightness;
+    ofParameter<int> pPiCamContrast;
+    
+    void pPiCamBrightnessChanged(int & pPiCamBrightness);
+    void pPiCamContrastChanged(int & pPiCamContrast);
+    int activeSettingParam;
+    
+    void generateMirrorTestFrame();
+    
+    void drawLEDMatrix(ofColor pixelMatrix[][10]);
+    void sendFrameToMirror(ofColor pixelMatrix[][10]);
+                        
+    bool display_on = true;
+                        
+    
+    // SERIAL
     ofSerial    serial;
     
     bool		bSendSerialMessage;			// a flag for sending serial
@@ -58,9 +78,9 @@ public:
     int			nBytesRead;					// how much did we read?
     int			nTimesRead;					// how many times did we read?
     
-    ofImage img;
-    int thresh;
+    void sendCommandToMirror(unsigned char cmd);
 
+    // CAM
     #ifdef __arm__
         ofxCvPiCam cam;
         int PiCam_saturation;
@@ -92,63 +112,23 @@ public:
         ofVideoGrabber cam;
     #endif
     
-    // Facedetection & Background substraction
+    // FACEDETECTION
     ofxCv::ObjectFinder finder;
-    ofxCv::RunningBackground background;
-    ofImage thresholded;
-
-    ConsoleListener consoleListener;
-    void onCharacterReceived(SSHKeyListenerEventData& e);
+    ofImage img;
     
-    void sendCommandToMirror(unsigned char cmd);
-    
-    // the arua images 
-    ofDirectory dir;
-    vector<ofImage> images;
-    // ofImage matrixOverlay;
-    
-    int currentImage;
-    
-    int shiftIndex;
-    void shiftMatrix(int dir);
-    
-    auraTimer sparkleTimer;
-    auraTimer shiftTimer;
-    auraTimer presentTimer;
     bool personPresent;
+    bool personPresentLastFrame;
+    bool personPresentChanged;
+    
     float personBrightness;
+    auraTimer presentTimer;
     
-    void sceneSparkle();
-    void sceneMirror();
-    void sceneTransition();
+    ofxAnimatableFloat sceneTransitionAnim;
     
-    ofxAnimatableFloat shift;
-    ofxAnimatableFloat sparklePulse;
-    
-    // ofColor pixelMatrix;
-    int sceneIndex;
-    int sceneCount;
-    
-    // GUI & Settings
-    void setupGui();
-    ofxPanel gui;
-    ofParameterGroup paramsGroup1;
-    ofParameter<float> pColorR;
-    ofParameter<float> pColorG;
-    ofParameter<float> pColorB;
-    ofParameter<int> pMultiplier;
-    ofParameter<int> pDivider;
-    
-    ofParameter<int> pBrightnessMin;
-    ofParameter<int> pBrightnessMax;
-    ofParameter<int> pBrightness;
-    
-    ofParameter<int> pPiCamBrightness;
-    ofParameter<int> pPiCamContrast;
-    
-    void pPiCamBrightnessChanged(int & pPiCamBrightness);
-    void pPiCamContrastChanged(int & pPiCamContrast);
-    
-    int activeSettingParam;
+    // SCENES
+    sceneManager SM;
 
 };
+
+
+

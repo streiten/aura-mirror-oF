@@ -1,15 +1,13 @@
 //
-//  animations.hpp
+//  utils.hpp
 //  led_matrix
 //
-//  Created by Alex on 16.11.15.
+//  Created by Alex on 17.11.15.
 //
 //
 
-#ifndef auraAnimations_h
-#define auraAnimations_h
-
-#include "ofMain.h"
+#ifndef utils_h
+#define utils_h
 
 class auraTimer {
     
@@ -26,4 +24,4 @@ public:
     
 };
 
-#endif /* animations_h */
+#endif /* utils_h */

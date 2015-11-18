@@ -53,7 +53,9 @@
 		FA6698091BF85C51003E8FCD /* ofxAnimatableOfColor.cpp in Sources */ = {isa = PBXBuildFile; fileRef = FA6698031BF85C51003E8FCD /* ofxAnimatableOfColor.cpp */; settings = {ASSET_TAGS = (); }; };
 		FA66980A1BF85C51003E8FCD /* ofxAnimatableOfPoint.cpp in Sources */ = {isa = PBXBuildFile; fileRef = FA6698051BF85C51003E8FCD /* ofxAnimatableOfPoint.cpp */; settings = {ASSET_TAGS = (); }; };
 		FA6698181BF96BB0003E8FCD /* auraDisplay.cpp in Sources */ = {isa = PBXBuildFile; fileRef = FA6698161BF96BB0003E8FCD /* auraDisplay.cpp */; settings = {ASSET_TAGS = (); }; };
-		FA66981D1BFA150E003E8FCD /* auraAnimations.cpp in Sources */ = {isa = PBXBuildFile; fileRef = FA66981B1BFA150E003E8FCD /* auraAnimations.cpp */; settings = {ASSET_TAGS = (); }; };
+		FA66981D1BFA150E003E8FCD /* scenes.cpp in Sources */ = {isa = PBXBuildFile; fileRef = FA66981B1BFA150E003E8FCD /* scenes.cpp */; settings = {ASSET_TAGS = (); }; };
+		FA6698291BFC2812003E8FCD /* sceneManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = FA6698271BFC2812003E8FCD /* sceneManager.cpp */; settings = {ASSET_TAGS = (); }; };
+		FA66982C1BFC298A003E8FCD /* utils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = FA66982A1BFC298A003E8FCD /* utils.cpp */; settings = {ASSET_TAGS = (); }; };
 		FB09C6B2A1DA0EA217240CB8 /* ofxCvGrayscaleImage.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 057122A817D12571F8C0C7A4 /* ofxCvGrayscaleImage.cpp */; };
 /* End PBXBuildFile section */
 
@@ -343,9 +345,13 @@
 		FA6698061BF85C51003E8FCD /* ofxAnimatableOfPoint.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ofxAnimatableOfPoint.h; sourceTree = "<group>"; };
 		FA6698161BF96BB0003E8FCD /* auraDisplay.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = auraDisplay.cpp; sourceTree = "<group>"; };
 		FA6698171BF96BB0003E8FCD /* auraDisplay.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = auraDisplay.h; sourceTree = "<group>"; };
-		FA66981B1BFA150E003E8FCD /* auraAnimations.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = auraAnimations.cpp; sourceTree = "<group>"; };
-		FA66981C1BFA150E003E8FCD /* auraAnimations.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = auraAnimations.h; sourceTree = "<group>"; };
+		FA66981B1BFA150E003E8FCD /* scenes.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = scenes.cpp; sourceTree = "<group>"; };
+		FA66981C1BFA150E003E8FCD /* scenes.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = scenes.h; sourceTree = "<group>"; };
 		FA66981F1BFA1C4C003E8FCD /* ConsoleListener.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ConsoleListener.h; sourceTree = "<group>"; };
+		FA6698271BFC2812003E8FCD /* sceneManager.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = sceneManager.cpp; sourceTree = "<group>"; };
+		FA6698281BFC2812003E8FCD /* sceneManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = sceneManager.h; sourceTree = "<group>"; };
+		FA66982A1BFC298A003E8FCD /* utils.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = utils.cpp; sourceTree = "<group>"; };
+		FA66982B1BFC298A003E8FCD /* utils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = utils.h; sourceTree = "<group>"; };
 		FB213FF0567D1B312DDBD05D /* linear_index.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 30; name = linear_index.h; path = ../../../addons/ofxOpenCv/libs/opencv/include/opencv2/flann/linear_index.h; sourceTree = SOURCE_ROOT; };
 		FB2852BC651C91987A1C26FB /* scan.hpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 30; name = scan.hpp; path = ../../../addons/ofxOpenCv/libs/opencv/include/opencv2/gpu/device/scan.hpp; sourceTree = SOURCE_ROOT; };
 		FD2373742F56BFA0EF7FBF09 /* color.hpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 30; name = color.hpp; path = ../../../addons/ofxOpenCv/libs/opencv/include/opencv2/gpu/device/color.hpp; sourceTree = SOURCE_ROOT; };
@@ -969,14 +975,15 @@
 		E4B69E1C0A3A1BDC003C02F2 /* src */ = {
 			isa = PBXGroup;
 			children = (
+				FA66982D1BFC454F003E8FCD /* scenes */,
 				FA66981F1BFA1C4C003E8FCD /* ConsoleListener.h */,
 				FA6698161BF96BB0003E8FCD /* auraDisplay.cpp */,
 				FA6698171BF96BB0003E8FCD /* auraDisplay.h */,
 				E4B69E1D0A3A1BDC003C02F2 /* main.cpp */,
 				E4B69E1E0A3A1BDC003C02F2 /* ofApp.cpp */,
 				E4B69E1F0A3A1BDC003C02F2 /* ofApp.h */,
-				FA66981B1BFA150E003E8FCD /* auraAnimations.cpp */,
-				FA66981C1BFA150E003E8FCD /* auraAnimations.h */,
+				FA66982A1BFC298A003E8FCD /* utils.cpp */,
+				FA66982B1BFC298A003E8FCD /* utils.h */,
 			);
 			path = src;
 			sourceTree = SOURCE_ROOT;
@@ -1067,6 +1074,17 @@
 			);
 			name = src;
 			path = "../../../../Dropbox/#PROJECTS/sfpc/recreating_the_past/of/addons/ofxAnimatable/src";
+			sourceTree = "<group>";
+		};
+		FA66982D1BFC454F003E8FCD /* scenes */ = {
+			isa = PBXGroup;
+			children = (
+				FA6698271BFC2812003E8FCD /* sceneManager.cpp */,
+				FA6698281BFC2812003E8FCD /* sceneManager.h */,
+				FA66981B1BFA150E003E8FCD /* scenes.cpp */,
+				FA66981C1BFA150E003E8FCD /* scenes.h */,
+			);
+			name = scenes;
 			sourceTree = "<group>";
 		};
 		FA7DE18CAD263BF5D191DB1B /* include */ = {
@@ -1205,10 +1223,11 @@
 				E6E21460246219EE9394310F /* PDM.cc in Sources */,
 				FA66980A1BF85C51003E8FCD /* ofxAnimatableOfPoint.cpp in Sources */,
 				E43C5A4AB73C09290F70362D /* Tracker.cc in Sources */,
-				FA66981D1BFA150E003E8FCD /* auraAnimations.cpp in Sources */,
+				FA66981D1BFA150E003E8FCD /* scenes.cpp in Sources */,
 				856AA354D08AB4B323081444 /* ofxBaseGui.cpp in Sources */,
 				5CBB2AB3A60F65431D7B555D /* ofxButton.cpp in Sources */,
 				B266578FC55D23BFEBC042E7 /* ofxGuiGroup.cpp in Sources */,
+				FA66982C1BFC298A003E8FCD /* utils.cpp in Sources */,
 				483908258D00B98B4BE69F07 /* ofxLabel.cpp in Sources */,
 				FA6698081BF85C51003E8FCD /* ofxAnimatableFloat.cpp in Sources */,
 				F285EB3169F1566CA3D93C20 /* ofxPanel.cpp in Sources */,
@@ -1217,6 +1236,7 @@
 				1CD33E884D9E3358252E82A1 /* ofxToggle.cpp in Sources */,
 				250A95BA26587BE85DB0A353 /* ofxCvColorImage.cpp in Sources */,
 				1D5F3298C2FA073628012944 /* ofxCvContourFinder.cpp in Sources */,
+				FA6698291BFC2812003E8FCD /* sceneManager.cpp in Sources */,
 				169D3C72FDE6C5590A1616F5 /* ofxCvFloatImage.cpp in Sources */,
 				FB09C6B2A1DA0EA217240CB8 /* ofxCvGrayscaleImage.cpp in Sources */,
 				E212C821D1064B92DD953A42 /* ofxCvHaarFinder.cpp in Sources */,

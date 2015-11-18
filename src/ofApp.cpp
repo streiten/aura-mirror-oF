@@ -8,16 +8,18 @@ using namespace cv;
     Mat frame,frameProcessed;
 #endif
 
-// States: IDLE, Inprogress
+#define SCENE_FADE 100
+#define JITTER_DELAY 1000
+#define BRIGHTNESS_MAX 128
 
 // animations shift / scale / rotate / fade / brightness
 // parameters: face size / closeup - general movement
-// averages... really really slow kenburns... 
 
 //--------------------------------------------------------------
 void ofApp::setup(){
-
+    
     debug = true;
+    // ofSetLogLevel(OF_LOG_ERROR);
     
     // General
     ofBackground(0, 0, 0);
@@ -39,8 +41,6 @@ void ofApp::setup(){
     #endif
     memset(bytesReadString, 0, 256);
     
-    // img.allocate(10, 10, OF_IMAGE_COLOR);
-    
     // Cam & Facedetection
     finder.setPreset(ObjectFinder::Fast);
     finder.getTracker().setSmoothingRate(0.05);
@@ -53,56 +53,23 @@ void ofApp::setup(){
         cam.videoSettings();
         cam.setup(640,480);
         finder.setup("haarcascade_frontalface_default.xml");
-
     #endif
     
-    // background.setLearningTime(900);
-    // background.setThresholdValue(20);
-    
-    // deprc...
-    thresh = 127;
-    
-    // The Aura Imagery
-    ofEnableAlphaBlending();
-    dir.listDir("auras/");
-    dir.sort(); // in linux the file system doesn't return file lists ordered in alphabetical order
-    //ofDisableAntiAliasing();
-    //ofDisableSmoothing();
-    
-    //allocate the vector to have as many ofImages as files
-    if( dir.size() ){
-        images.assign(dir.size(), ofImage());
-    }
-    
-    // you can now iterate through the files and load them into the ofImage vector
-    for(int i = 0; i < (int)dir.size(); i++){
-        images[i].loadImage(dir.getPath(i));
-    }
-    ofSetLogLevel(OF_LOG_ERROR);
-    currentImage = 0;
-    
-    // matrixOverlay.loadImage("radialoveray.png");
-    
-    ofBackground(ofColor::white);
-    
-    // Scenes
-    sceneIndex = 0;
-    sceneCount = 3;
-    
-    shiftIndex = 0;
-    
-    sparkleTimer.set(1000,true);
-    shiftTimer.set(500,true);
-    presentTimer.set(2000,false);
-    
+    presentTimer.set(JITTER_DELAY,false);
     personPresent = false;
-    personBrightness = 128;
+    personPresentLastFrame = false;
+    personPresentChanged = false;
+    personBrightness = BRIGHTNESS_MAX;
     
-    sceneSparkle();
     
-    sparklePulse.animateTo(255);
-    sparklePulse.setRepeatType(LOOP_BACK_AND_FORTH);
-    sparklePulse.setCurve(EASE_IN_EASE_OUT);
+    SM.setup();
+        
+//    sparklePulse.animateTo(BRIGHTNESS_MAX);
+//    sparklePulse.setRepeatType(LOOP_BACK_AND_FORTH);
+//    sparklePulse.setCurve(EASE_IN_EASE_OUT);
+    
+    // sceneTransitionAnim.setCurve(EASE_IN_EASE_OUT);
+    // sceneTransitionAnim.setRepeatType(LOOP_BACK_AND_FORTH_ONCE);
     
     // The Gui
     setupGui();
@@ -113,7 +80,6 @@ void ofApp::setup(){
 //--------------------------------------------------------------
 void ofApp::update(){
     
-    
     #ifdef __arm__
         frame = cam.grab();
         if(!frame.empty()) finder.update(frame);
@@ -121,92 +87,78 @@ void ofApp::update(){
         cam.update();
         if(cam.isFrameNew()) {
             finder.update(cam);
-            // background.update(cam, thresholded);
-            // thresholded.update();
         }
     #endif
     
+    
     if(finder.size() > 0) {
+        // Person Watchdog thing
         presentTimer.reset();
         personPresent = true;
     }
     
+    // prevent factedetection fails to invoke scenechanges
     if(presentTimer.check()) {
         personPresent = false;
     }
     
-    shift.update(1.0f/100);
-    sparklePulse.update(1.0f/700);
-
-    switch(sceneIndex) {
-    
-        case 0:
-            sceneSparkle();
-            break;
-            
-        case 1:
-            sceneMirror();
-            break;
-            
-        case 2:
-            generateMirrorTestFrame();
-            break;
-        
-        default:
-            break;
-    
+    if( personPresentLastFrame != personPresent ) {
+        cout << "Person present changed!" << endl ;
+        personPresentChanged = true;
+        if(!sceneTransitionAnim.isAnimating()) {
+            sceneTransitionAnim.reset();
+            sceneTransitionAnim.animateTo(1);
+        };
+//        sparklePulse.reset();
+//        sparklePulse.animateTo(BRIGHTNESS_MAX);
+    } else {
+        personPresentChanged = false;
     }
     
-    
-    // for debug display
-    generateStripData();
+    personPresentLastFrame = personPresent;
 
+    // Updating the animators
+//    sparklePulse.update(1.0f/700);
+    
+    sceneTransitionAnim.update(1.0f/SCENE_FADE);
+    
+    if(sceneTransitionAnim.hasFinishedAnimating()){
+        if(personPresent) {
+            //sceneIndex = 1;
+        } else {
+            //sceneIndex = 0;
+        }
+    }
+    
+    // SM.currentScene = 0;
+    SM.scenes[SM.currentScene]->update();
+    
     if (bSendSerialMessage){
         sendCommandToMirror('X');
     }
     
-    // unsigned char * pixelsA = myImg.getPixels();
+    // unsigned char * pixels = myImg.getPixels();
 
 }
 
 //--------------------------------------------------------------
 void ofApp::draw(){
     
-    sendFrameToMirror();
-    
+    sendFrameToMirror(SM.scenes[SM.currentScene]->pixelMatrix);
+
     #ifdef __arm__
         if(!frame.empty()) {
-        //threshold(frame,frameProcessed,thresh,255,0);
-        //drawMat(frameProcessed,320,0);
-        drawMat(frame,0,0);
-        // finder.draw();
-    }
+            drawMat(frame,0,0);
+        }
     #else
         cam.draw(0, 0);
-        thresholded.draw(640, 0);
     #endif
     finder.draw();
-    
-    // ofDrawBitmapString("threshold: " + ofToString(thresh),320,10);
-    
-    drawMatrix();
-    // drawStrip();
-    // img.draw(0, 0,100,100);
-    
-//    if(finder.size() > 0) {
-//        if(display_on){
-//            sendCommandToMirror('X');
-//            display_on = false;
-//        }
-//    } else {
-//        if(!display_on){
-//            sendCommandToMirror('X');
-//            display_on = true;
-//        }
-//    }
-    
 
+    drawLEDMatrix(SM.scenes[SM.currentScene]->pixelMatrix);
 
+    ofDrawRectangle(0, sceneTransitionAnim.val() * ofGetHeight() , ofGetWidth(), 2);
+    
     for(int i = 0; i < finder.size(); i++) {
         ofRectangle object = finder.getObjectSmoothed(i);
         String s = "Tracker width:" + ofToString(object.height) + " X: " + ofToString(object.x) + " Y: " +  ofToString(object.y);
@@ -214,241 +166,56 @@ void ofApp::draw(){
         // ofDrawBitmapStringHighlight(ofToString(finder.getLabel(i)), 210, 0);
     }
     
-    images[currentImage].draw(ofGetWidth()-100,0,100,100);
-    // matrixOverlay.draw(ofGetWidth()-300,0,300,300);
-    
-    ofDrawBitmapStringHighlight(ofToString((int) ofGetFrameRate()) + "fps", 10, 20);
-    ofDrawBitmapStringHighlight(ofToString(finder.size()), 10, 40);
-    
-    if(finder.size() > 0) {
-        ofDrawBitmapStringHighlight("Present",210, 10);
-    }
-    
-    if(personPresent){
-        ofDrawBitmapStringHighlight("Present smooth",210, 30);
-    }
-    
-    ofDrawBitmapStringHighlight("Calculated Brightness: "+ ofToString(personBrightness), 210, 50);
+        // draw the LED Display & serialized strip simulation
+    if(debug){
 
-    
+        SM.mirror.getCurrentImage().draw(ofGetWidth()-100,0,100,100);
+        
+        ofDrawBitmapStringHighlight(ofToString((int) ofGetFrameRate()) + "fps", 10, 20);
+        ofDrawBitmapStringHighlight(ofToString(finder.size()), 10, 40);
+        
+        if(personPresent){
+            ofDrawBitmapStringHighlight("Person present",210, 30);
+        }
+        
+        ofDrawBitmapStringHighlight("Calculated Brightness: "+ ofToString(personBrightness), 210, 50);
+        ofDrawBitmapStringHighlight(ofToString(sceneTransitionAnim.val()), 210, 90);
+        
+    }
+
     gui.draw();
 
 }
 
-void ofApp::sceneSparkle(){
 
-    int k = 0;
-    int setMatrix[] = {
-        0,0,0,0,0,0,0,0,0,0,
-        0,0,0,0,0,0,0,0,0,0,
-        0,0,0,0,0,0,0,0,0,0,
-        0,0,0,0,0,0,0,0,0,0,
-        0,0,0,0,1,1,0,0,0,0,
-        0,0,0,0,1,1,0,0,0,0,
-        0,0,0,0,0,0,0,0,0,0,
-        0,0,0,0,0,0,0,0,0,0,
-        0,0,0,0,0,0,0,0,0,0,
-        0,0,0,0,0,0,0,0,0,0
-    };
+void ofApp::drawLEDMatrix(ofColor pixelMatrix[][10]) {
     
     for(int i = 0; i < 10; i++){
         for(int j=0; j < 10;j++){
-            if(setMatrix[k] == 0 ){
-                pixelMatrix[i][j] = ofColor(0,0,0);
-            } else {
-                pixelMatrix[i][j] = ofColor(255,255,255);
-                pixelMatrix[i][j].setBrightness(sparklePulse.val());
-            };
-           k++;
-        }
-    }
-
-};
-
-
-void ofApp::sceneMirror(){
-    
-    int k = 0;
-    int setMatrix[] = {
-        0,0,0,1,1,1,1,0,0,0,
-        0,0,1,1,1,1,1,1,0,0,
-        0,1,1,1,1,1,1,1,1,0,
-        1,1,1,1,1,1,1,1,1,1,
-        1,1,1,1,1,1,1,1,1,1,
-        1,1,1,1,1,1,1,1,1,1,
-        1,1,1,1,1,1,1,1,1,1,
-        0,1,1,1,1,1,1,1,1,0,
-        0,0,1,1,1,1,1,1,0,0,
-        0,0,0,1,1,1,1,0,0,0
-    };
-    
-    if( shiftTimer.check() ) {
-        
-        generateMirrorFrame();
-        
-        for(int i = 0; i < shiftIndex ;i++) {
-            shiftMatrix(1);
-        }
-        shiftIndex++;
-        if(shiftIndex > 9) shiftIndex = 0;
-    }
-    
-    for(int i = 0; i < finder.size(); i++) {
-        ofRectangle person = finder.getObjectSmoothed(i);
-        personBrightness = ofMap(person.width, pBrightnessMin, pBrightnessMax, 0, 255,true);
-    }
-    
-    setMirrorFrameBrightness(personBrightness);
-    
-    for(int i = 0; i < 10; i++){
-        for(int j=0; j < 10;j++){
-            if(setMatrix[k] == 0 ){
-                pixelMatrix[i][j] = ofColor(0,0,0);
-            }
-            k++;
-        }
-    }
-
-};
-
-
-// +++ DISPLAY FUNCTIONS +++
-
-
-void ofApp::generateStripData() {
-    
-    int k = 0;
-    // Line by line to linear strip
-    for(int i = 0; i < 10; i++){
-        
-        int m = 0;
-        for(int j=0; j < 19;j++){
-            
-            // inverse order on line for every second line in matrix
-            int mNew = m;
-            if((i+1)%2 == 0) {
-                mNew = 9 - m;
-            }
-            
-            if( j%2 == 0 ) {
-                pixelStrip[k] = pixelMatrix[i][mNew];
-                m++;
-            
-            //every second pixel is blanks / skipped
-            } else {
-                ofColor c(0,0,0);
-                pixelStrip[k] = c;
-            }
-            
-            k++;
-        }
-    }
-}
-
-
-void ofApp::drawMatrix() {
-    int k = 0;
-    
-    for(int i = 0; i < 10; i++){
-        for(int j=0; j < 19;j++){
-            // Calculate position of Pixels to emulate Hardware zig-zag setup
-            int jNew = j;
-            // invert from left / right order every second row
-            if((i+1)%2 == 0) {
-               jNew = 18 - j;
-            }
-            
-            int x = jNew*10+5;
-            int y = i*20+5;
-            
             ofPushStyle();
             ofFill();
-            ofSetColor(pixelStrip[k]);
-            ofDrawRectangle(x,y,10,10);
+            ofSetColor(pixelMatrix[i][j]);
+            ofDrawRectangle(j * 20 + 10 , i * 20 + 10 ,10,10);
             ofPopStyle();
-            
-            k++;
-            
-        }
-    }
-}
-
-void ofApp::drawStrip() {
-    for (int i = 0; i<190; i++) {
-        ofPushStyle();
-        ofSetColor(pixelStrip[i]);
-        ofFill();
-        ofDrawRectangle(i*4, 0, 4, 4);
-        ofPopStyle();
-    }
-}
-
-void ofApp::generateMirrorFrame() {
-    
-    ofColor c;
-    
-    for(int i = 0; i < 10; i++){
-        for(int j=0; j < 10;j++){
-            c = images[currentImage].getPixelsRef().getColor(j,i);
-            pixelMatrix[i][j] = c;
-        }
-    }
-
-}
-
-
-void ofApp::setMirrorFrameBrightness( float brightness ) {
-    for(int i = 0; i < 10; i++){
-        for(int j=0; j < 10;j++){
-            pixelMatrix[i][j].setBrightness( brightness );
         }
     }
     
 }
 
+//void ofApp::generateMirrorTestFrame() {
+//
+//    for(int i = 0; i < 10; i++){
+//        for(int j=0; j < 10;j++){
+//            pixelMatrix[i][j] = ofColor(0,0,0);
+//        }
+//    }
+//
+//    pixelMatrix[0][0] = ofColor(255,0,0);
+//    pixelMatrix[5][5] = ofColor(0,255,0);
+//    pixelMatrix[9][9] = ofColor(0,0,255);
+//}
 
-void ofApp::shiftMatrix(int dir) {
-
-    
-    ofColor line_buffer[10];
-
-    switch(dir) {
-        case 0:
-            memcpy(&line_buffer,&pixelMatrix, sizeof(ofColor)*10);
-            for(int i=0;i<9;i++) {
-                memcpy(&pixelMatrix[i],&pixelMatrix[i+1], sizeof(ofColor)*10);
-            }
-            memcpy(&pixelMatrix[9], &line_buffer, sizeof(ofColor)*10);
-            break;
-            
-        case 1:
-            memcpy(&line_buffer,&pixelMatrix[9], sizeof(ofColor)*10);
-            for(int i=0;i<9;i++) {
-                memcpy(&pixelMatrix[9-i],&pixelMatrix[8-i], sizeof(ofColor)*10);
-            }
-            memcpy(&pixelMatrix[0], &line_buffer, sizeof(ofColor)*10);
-            break;
-            
-        default:
-            break;
-    }
-    
-}
-
-void ofApp::generateMirrorTestFrame() {
-
-    for(int i = 0; i < 10; i++){
-        for(int j=0; j < 10;j++){
-            pixelMatrix[i][j] = ofColor(0,0,0);
-        }
-    }
-
-    pixelMatrix[0][0] = ofColor(255,0,0);
-    pixelMatrix[5][5] = ofColor(0,255,0);
-    pixelMatrix[9][9] = ofColor(0,0,255);
-}
-
-void ofApp::sendFrameToMirror() {
+void ofApp::sendFrameToMirror(ofColor pixelMatrix[][10]) {
     if(serial.isInitialized()){
         unsigned char serialOutBuffer[301];
         // Indicate DATA is coming
@@ -467,6 +234,80 @@ void ofApp::sendFrameToMirror() {
     }
 }
 
+void ofApp::sendCommandToMirror(unsigned char cmd) {
+    if(serial.isInitialized()){
+        
+        unsigned char cmdseq[] = {'@', cmd };
+        serial.writeBytes(&cmdseq[0],2);
+        cout << "Display toggle CMD sent!" << endl;
+        
+        nTimesRead = 0;
+        nBytesRead = 0;
+        int nRead  = 0;  // a temp variable to keep count per read
+        
+        unsigned char bytesReturned[255];
+        
+        memset(bytesReadString, 0, 256);
+        memset(bytesReturned, 0, 255);
+        
+        while( (nRead = serial.readBytes( bytesReturned, 255)) > 0){
+            nTimesRead++;
+            nBytesRead = nRead;
+        };
+        
+        memcpy(bytesReadString, bytesReturned, 255);
+        cout << "Display said:" << bytesReadString << endl;
+        bSendSerialMessage = false;
+    }
+    
+}
+
+
+void ofApp::setupGui (){
+    
+    gui.setup("Parameters");
+    gui.setPosition(0,200);
+    
+    paramsGroup1.setName("Settings");
+    
+    //    paramsGroup1.add(pShow[0].set( "Show/Hide", true ));
+    //    paramsGroup1.add(pColorR.set( "R", 128, 0, 255 ));
+    //    paramsGroup1.add(pColorG.set( "G", 128, 0, 255 ));
+    //    paramsGroup1.add(pColorB.set("B", 128, 0, 255 ));
+    //    paramsGroup1.add(pMultiplier.set("Multiply", 1, 1, 50));
+    //    paramsGroup1.add(pDivider.set("Divide", 1, 1, 10));
+    //    paramsGroup1.add(pBrightness.set("Brightness", 128, 0, 255));
+    
+    paramsGroup1.add(pBrightnessMin.set("Brightness Min", 140, 0, 300));
+    paramsGroup1.add(pBrightnessMax.set("Brightness Max", 250, 140, 300));
+    
+    paramsGroup1.add(pPiCamBrightness.set("PiCam Brightness", 50, 0, 100));
+    paramsGroup1.add(pPiCamContrast.set("PiCam Contrast", 50, 0, 100));
+    
+    // paramsGroup1.add(pJitterScale[0].set("Jitter scale", true));
+    
+    gui.add(paramsGroup1);
+    
+    gui.loadFromFile("settings.xml");
+    
+}
+
+
+//--------------------------------------------------------------
+void ofApp::pPiCamBrightnessChanged(int & pPiCamBrightness){
+#ifdef __arm__
+    cam.setBrightness(pPiCamBrightness);
+#endif
+}
+
+//--------------------------------------------------------------
+void ofApp::pPiCamContrastChanged(int & pPiCamContrast){
+#ifdef __arm__
+    cam.setContrast(pPiCamContrast);
+#endif
+}
+
+
 // +++ SSH Key Input +++
 void ofApp::onCharacterReceived(SSHKeyListenerEventData& e)
 {
@@ -476,12 +317,15 @@ void ofApp::onCharacterReceived(SSHKeyListenerEventData& e)
 //--------------------------------------------------------------
 void ofApp::keyPressed(int key){
     
+    // Brightness Min & Max
     if(key == 'q') { activeSettingParam = 1 ;}
     if(key == 'w') { activeSettingParam = 2 ;}
     
+    // PiCam contrast & brightness
     if(key == 'b') { activeSettingParam = 3 ;}
     if(key == 'c') { activeSettingParam = 4 ;}
     
+    // Save and Load Settings
     if(key == 's'){
         gui.saveToFile("settings.xml");
         cout << "Settings saved" << endl;
@@ -492,17 +336,13 @@ void ofApp::keyPressed(int key){
     }
     
     if(key == 'o') {
-        sceneIndex++;
-        sceneIndex %= sceneCount;
-        cout << "Sceneindex: " << sceneIndex << endl;
+        SM.currentScene++;
+        SM.currentScene %= 2;
+        cout << "Current Scene: " << SM.currentScene << endl;
     }
     
     if(key == 'i') {
-        if (dir.size() > 0){
-            currentImage++;
-            currentImage %= dir.size();
-            cout << "Image Index: " << currentImage << endl;
-        }
+        SM.mirror.setImage();
     }
     
     if(key == '+') {
@@ -580,17 +420,7 @@ void ofApp::mouseMoved(int x, int y ){
 
 //--------------------------------------------------------------
 void ofApp::mouseDragged(int x, int y, int button){
-        
-    #ifdef __arm__
-        // if( activePiCamSetting == 0 ) { cam.setSaturation(ofMap(x,0,ofGetWidth(),-100,100));}
-        // if( activePiCamSetting == 1 ) { cam.setSharpness(ofMap(x,0,ofGetWidth(),-100,100));}
-        // if( activePiCamSetting == 4 ) { thresh = ofMap(x,0,ofGetWidth(),0,255); }
-    #endif
-
-    //cam.setISO(value);
-    //cam.setVideoStabilisation(value);
-    //cam.setExposureCompensation(value);
-
+    
 }
 
 //--------------------------------------------------------------
@@ -617,79 +447,6 @@ void ofApp::gotMessage(ofMessage msg){
 //--------------------------------------------------------------
 void ofApp::dragEvent(ofDragInfo dragInfo){
     
-}
-
-void ofApp::sendCommandToMirror(unsigned char cmd) {
-    if(serial.isInitialized()){
-
-    unsigned char cmdseq[] = {'@', cmd };
-    serial.writeBytes(&cmdseq[0],2);
-    cout << "Display toggle CMD sent!" << endl;
-    
-    nTimesRead = 0;
-    nBytesRead = 0;
-    int nRead  = 0;  // a temp variable to keep count per read
-    
-    unsigned char bytesReturned[255];
-    
-    memset(bytesReadString, 0, 256);
-    memset(bytesReturned, 0, 255);
-    
-    while( (nRead = serial.readBytes( bytesReturned, 255)) > 0){
-        nTimesRead++;
-        nBytesRead = nRead;
-    };
-    
-    memcpy(bytesReadString, bytesReturned, 255);
-    cout << "Display said:" << bytesReadString << endl;
-    bSendSerialMessage = false;
-    }
-    
-}
-
-
-void ofApp::setupGui (){
-    
-    gui.setup("Parameters");
-    gui.setPosition(0,200);
-    
-    paramsGroup1.setName("Settings");
-    
-//    paramsGroup1.add(pShow[0].set( "Show/Hide", true ));
-//    paramsGroup1.add(pColorR.set( "R", 128, 0, 255 ));
-//    paramsGroup1.add(pColorG.set( "G", 128, 0, 255 ));
-//    paramsGroup1.add(pColorB.set("B", 128, 0, 255 ));
-//    paramsGroup1.add(pMultiplier.set("Multiply", 1, 1, 50));
-//    paramsGroup1.add(pDivider.set("Divide", 1, 1, 10));
-//    paramsGroup1.add(pBrightness.set("Brightness", 128, 0, 255));
-    
-    paramsGroup1.add(pBrightnessMin.set("Brightness Min", 140, 0, 300));
-    paramsGroup1.add(pBrightnessMax.set("Brightness Max", 250, 140, 300));
-    
-    paramsGroup1.add(pPiCamBrightness.set("PiCam Brightness", 50, 0, 100));
-    paramsGroup1.add(pPiCamContrast.set("PiCam Contrast", 50, 0, 100));
-
-    // paramsGroup1.add(pJitterScale[0].set("Jitter scale", true));
-    
-    gui.add(paramsGroup1);
-   
-    gui.loadFromFile("settings.xml");
-
-}
-
-
-//--------------------------------------------------------------
-void ofApp::pPiCamBrightnessChanged(int & pPiCamBrightness){
-#ifdef __arm__
-    cam.setBrightness(pPiCamBrightness);
-#endif
-}
-
-//--------------------------------------------------------------
-void ofApp::pPiCamContrastChanged(int & pPiCamContrast){
-#ifdef __arm__
-    cam.setContrast(pPiCamContrast);
-#endif
 }
 
 
@@ -724,3 +481,6 @@ void ofApp::pPiCamContrastChanged(int & pPiCamContrast){
 //cam.setROI(ROI);
 //cam.setAWBGains(value,awbGainB.get());
 //cam.setAWBGains(awbGainR.get(),value);
+
+
+

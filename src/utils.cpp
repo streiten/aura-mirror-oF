@@ -1,12 +1,13 @@
 //
-//  animations.cpp
+//  utils.cpp
 //  led_matrix
 //
-//  Created by Alex on 16.11.15.
+//  Created by Alex on 17.11.15.
 //
 //
 
-#include "auraAnimations.h"
+#include "utils.h"
+#include "ofMain.h"
 
 void auraTimer::set(int millis,bool autoReset){
     this->delay = millis;
@@ -14,7 +15,7 @@ void auraTimer::set(int millis,bool autoReset){
 }
 
 bool auraTimer::check() {
-
+    
     if( (ofGetElapsedTimeMillis() - this->last_time) > this->delay){
         
         if(autoReset){reset();}
@@ -33,7 +34,3 @@ int auraTimer::get() {
 void auraTimer::reset() {
     this->last_time = ofGetElapsedTimeMillis();
 };
-
-
-    
-
