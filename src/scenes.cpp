@@ -24,10 +24,10 @@ void scene::setFrameBrightness( float brightness ) {
 
 void sceneIntro::setup(){
     
-    pulse.animateTo(128);
+    pulse.animateTo(BRIGHTNESS_MAX);
     pulse.setRepeatType(LOOP_BACK_AND_FORTH);
     pulse.setCurve(EASE_IN_EASE_OUT);
-    pulse.setDuration(3);
+    pulse.setDuration(10);
     
 };
 
@@ -65,9 +65,10 @@ void sceneIntro::update(){
 
 void sceneMirror::setup(){
     
-    pulse.animateTo(128);
+    pulse.animateTo(BRIGHTNESS_MAX);
     pulse.setRepeatType(LOOP_BACK_AND_FORTH);
     pulse.setCurve(EASE_IN_EASE_OUT);
+    pulse.setDuration(10);
 
     shiftTimer.set(500,true);
 
