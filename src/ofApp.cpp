@@ -49,6 +49,7 @@ void ofApp::setup(){
         finder.setup("haarcascade_frontalface_alt2.xml");
         cam.setup(640,480,false);//setup camera (w,h,color = true,gray = false);
         cam.setFlips(false,true);
+        cam.setISO(800);
     #else
         cam.videoSettings();
         cam.setup(640,480);
@@ -260,6 +261,46 @@ void ofApp::setupGui (){
     
     paramsGroup1.add(pPiCamBrightness.set("PiCam Brightness", 50, 0, 100));
     paramsGroup1.add(pPiCamContrast.set("PiCam Contrast", 50, 0, 100));
+
+    paramsGroup1.add(pPiCamISO.set("ISO",300,100,800));
+    paramsGroup1.add(pPiCamExposureMeteringMode.set("PiCam Metering Mode", 0,0,4));
+    paramsGroup1.add(pPiCamExposureCompensation.set("PiCam Exposure Compensation", 0,-10,10));
+    paramsGroup1.add(pPiCamExposureMode.set("PiCam Exposure Mode", 0,0,13));
+    paramsGroup1.add(pPiCamRoiX.set("ROI x",0,0,1));
+    paramsGroup1.add(pPiCamRoiY.set("ROI y",0,0,1));
+    paramsGroup1.add(pPiCamRoiW.set("ROI w",1,0,1));
+    paramsGroup1.add(pPiCamRoiH.set("ROI h",1,0,1));
+    
+    pPiCamISO.addListener(this,&ofApp::pPiCamISOChanged);
+    pPiCamExposureCompensation.addListener(this,&ofApp::pPiCamExposureCompensationChanged);
+    pPiCamExposureMeteringMode.addListener(this,&ofApp::pPiCamExposureMeteringModeChanged);
+    pPiCamExposureMode.addListener(this,&ofApp::pPiCamExposureModeChanged);
+    
+    pPiCamRoiX.addListener(this,&ofApp::pPiCamRoiXChanged);
+    pPiCamRoiY.addListener(this,&ofApp::pPiCamRoiYChanged);
+    pPiCamRoiW.addListener(this,&ofApp::pPiCamRoiWChanged);
+    pPiCamRoiH.addListener(this,&ofApp::pPiCamRoiHChanged);
+    
+    PiCamExposureMeteringModes[0] = "average";
+    PiCamExposureMeteringModes[1] = "spot";
+    PiCamExposureMeteringModes[2] = "backlit";
+    PiCamExposureMeteringModes[3] = "matrix";
+    PiCamExposureMeteringModes[4] = "max";
+    
+    PiCamExposureModes[ 0] = "off";
+    PiCamExposureModes[ 1] = "auto";
+    PiCamExposureModes[ 2] = "night";
+    PiCamExposureModes[ 3] = "night preview";
+    PiCamExposureModes[ 4] = "backlight";
+    PiCamExposureModes[ 5] = "spotlight";
+    PiCamExposureModes[ 6] = "sports";
+    PiCamExposureModes[ 7] = "snow";
+    PiCamExposureModes[ 8] = "beach";
+    PiCamExposureModes[ 9] = "very long";
+    PiCamExposureModes[10] = "fixed fps";
+    PiCamExposureModes[11] = "antishake";
+    PiCamExposureModes[12] = "fireworks";
+    PiCamExposureModes[13] = "max";
     
     // paramsGroup1.add(pJitterScale[0].set("Jitter scale", true));
     
@@ -287,6 +328,73 @@ void ofApp::pPiCamContrastChanged(int & pPiCamContrast){
 
 }
 
+
+void ofApp::pPiCamISOChanged(int &value){
+#ifdef __arm__
+    cam.setISO(value);
+#endif
+cout << "pPiCam Event Handler Bang " << value << endl;
+
+}
+
+void ofApp::pPiCamExposureCompensationChanged(int &value){
+#ifdef __arm__
+    cam.setExposureCompensation(value);
+#endif
+    cout << "pPiExposure Compensation Event Handler Bang " << value << endl;
+
+}
+void ofApp::pPiCamExposureMeteringModeChanged(int &value){
+    pPiCamExposureMeteringMode.setName(PiCamExposureMeteringModes[value]);
+#ifdef __arm__
+    if(value == pPiCamExposureMeteringMode.getMax()) value = MMAL_PARAM_EXPOSUREMETERINGMODE_MAX;
+    cam.setExposureMeteringMode((MMAL_PARAM_EXPOSUREMETERINGMODE_T)value);
+#endif
+    cout << "pPiExposure Metering Mode Event Handler Bang " << value << endl;
+
+
+}
+void ofApp::pPiCamExposureModeChanged(int &value){
+    pPiCamExposureMode.setName(PiCamExposureModes[value]);
+#ifdef __arm__
+    if(value == pPiCamExposureMode.getMax()) value = MMAL_PARAM_EXPOSUREMODE_MAX;
+    cam.setExposureMode((MMAL_PARAM_EXPOSUREMODE_T)value);
+#endif
+    cout << "pPiExposure Mode Event Handler Bang " << value << endl;
+
+}
+void ofApp::pPiCamRoiXChanged(float &value){
+    ROI.x = value;
+#ifdef __arm__
+    cam.setROI(ROI);
+#endif
+    cout << "pPiRoiX Event Handler Bang " << value << endl;
+
+}
+void ofApp::pPiCamRoiYChanged(float &value){
+    ROI.y = value;
+#ifdef __arm__
+    cam.setROI(ROI);
+#endif
+    cout << "pPiRoiY Event Handler Bang " << value << endl;
+
+}
+void ofApp::pPiCamRoiWChanged(float &value){
+    ROI.width = value;
+#ifdef __arm__
+    cam.setROI(ROI);
+#endif
+    cout << "pPiRoiW Event Handler Bang " << value << endl;
+
+}
+void ofApp::pPiCamRoiHChanged(float &value){
+    ROI.height = value;
+#ifdef __arm__
+    cam.setROI(ROI);
+#endif
+    cout << "pPiRoiH Event Handler Bang " << value << endl;
+
+}
 
 // +++ SSH Key Input +++
 void ofApp::onCharacterReceived(SSHKeyListenerEventData& e)
@@ -449,8 +557,6 @@ void ofApp::dragEvent(ofDragInfo dragInfo){
 //
 //cam.setShutterSpeed(value);
 //cam.setRotation(value);
-//cam.setFlips(value,vflip.get());
-//cam.setFlips(hflip.get(),value);
 //ROI.x = value;
 //cam.setROI(ROI);
 //ROI.y = value;

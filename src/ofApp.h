@@ -57,8 +57,32 @@ public:
     ofParameter<int> pPiCamBrightness;
     ofParameter<int> pPiCamContrast;
     
-    void pPiCamBrightnessChanged(int & pPiCamBrightness);
-    void pPiCamContrastChanged(int & pPiCamContrast);
+    ofParameter<int>  pPiCamExposureMeteringMode;
+    ofParameter<int>  pPiCamExposureCompensation;
+    ofParameter<int>  pPiCamExposureMode;
+    
+    ofParameter<int>  pPiCamISO;
+    ofParameter<float> pPiCamRoiX;
+    ofParameter<float> pPiCamRoiY;
+    ofParameter<float> pPiCamRoiW;
+    ofParameter<float> pPiCamRoiH;
+    
+    void pPiCamBrightnessChanged(int &value);
+    void pPiCamContrastChanged(int &value);
+    
+    void pPiCamRoiXChanged(float &value);
+    void pPiCamRoiYChanged(float &value);
+    void pPiCamRoiWChanged(float &value);
+    void pPiCamRoiHChanged(float &value);
+    void pPiCamExposureMeteringModeChanged(int &value);
+    void pPiCamExposureModeChanged(int &value);
+    void pPiCamExposureCompensationChanged(int &value);
+    void pPiCamISOChanged(int &value);
+    
+    ofRectangle ROI;
+    string PiCamExposureModes[14];
+    string PiCamExposureMeteringModes[5];
+    
     int activeSettingParam;
     
     void generateMirrorTestFrame();
@@ -104,10 +128,20 @@ public:
         float PiCam_awbGainR;
         float PiCam_awbGainB;
         int PiCam_imageFX;
-        string exposureModes[14];
-        string exposureMeteringModes[5];
-        string awbModes[11];
-        string imageFXLabels[24];
+        string PiCam_awbModes[11];
+        string PiCam_imageFXLabels[24];
+    
+    void PiCam_saturationChanged(int &value);
+    void PiCam_sharpnessChanged(int &value);
+    void PiCam_vstabilisationChanged(bool &value);
+    void PiCam_shutterSpeedChanged(int &value);
+    void PiCam_rotationChanged(int &value);
+    void PiCam_hflipChanged(bool &value);
+    void PiCam_vflipChanged(bool &value);
+    void PiCam_awbModeChanged(int &value);
+    void PiCam_awbGainRChanged(float &value);
+    void PiCam_awbGainBChanged(float &value);
+    void PiCam_imageFXChanged(int &value);
     #else
         ofVideoGrabber cam;
     #endif

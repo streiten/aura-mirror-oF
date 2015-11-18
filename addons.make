@@ -1,6 +1,5 @@
+ofxAnimatable
 ofxCv
 ofxFaceTracker
 ofxGui
 ofxOpenCv
-ofxCvPiCam
-ofxAnimatable
