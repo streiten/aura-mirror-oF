@@ -425,7 +425,7 @@ void ofApp::pPiCamRoiHChanged(float &value){
 void ofApp::pPiCamImageFXChanged(int &value){
     pPiCamImageFX.setName(PiCamImageFXLabels[value]);//display the preset name in the UI
 #ifdef __arm__
-    if(value == imageFX.getMax()) value = MMAL_PARAM_IMAGEFX_MAX;//the preset max value is different from the UI
+    if(value == pPiCamImageFX.getMax()) value = MMAL_PARAM_IMAGEFX_MAX;//the preset max value is different from the UI
     cam.setImageFX((MMAL_PARAM_IMAGEFX_T)value);
 #endif
     
