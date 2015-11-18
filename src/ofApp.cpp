@@ -8,9 +8,14 @@ using namespace cv;
     Mat frame,frameProcessed;
 #endif
 
-#define SCENE_FADE 100
-#define JITTER_DELAY 1000
+#define PRESENT_DELAY 2000
 #define BRIGHTNESS_MAX 128
+
+#ifdef __arm__
+    #define FPS 10
+#else
+    #define FPS 240
+#endif
 
 // animations shift / scale / rotate / fade / brightness
 // parameters: face size / closeup - general movement
@@ -19,12 +24,11 @@ using namespace cv;
 void ofApp::setup(){
     
     debug = true;
-    ofSetLogLevel(OF_LOG_ERROR);
     
     // General
     ofBackground(0, 0, 0);
     //ofSetVerticalSync(true);
-    //ofSetFrameRate(120);
+    ofSetFrameRate(60);
     
     consoleListener.setup(this);
     consoleListener.startThread(false, false);
@@ -55,11 +59,12 @@ void ofApp::setup(){
         finder.setup("haarcascade_frontalface_default.xml");
     #endif
     
-    presentTimer.set(JITTER_DELAY,false);
+    presentTimer.set(PRESENT_DELAY,false);
     personPresent = false;
     personPresentLastFrame = false;
+    
     personPresentChanged = false;
-    personBrightness = BRIGHTNESS_MAX;
+//    personBrightness = BRIGHTNESS_MAX;
     
     
     SM.setup();
@@ -113,7 +118,7 @@ void ofApp::update(){
     }
     personPresentLastFrame = personPresent;
     
-    sceneTransitionAnim.update(1.0f/SCENE_FADE);
+    sceneTransitionAnim.update(1.0f/FPS);
     
     if(sceneTransitionAnim.hasFinishedAnimating()){
         if(personPresent) {

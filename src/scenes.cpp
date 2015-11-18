@@ -9,10 +9,12 @@
 #include "scenes.h"
 #include "ofxAnimatable.h"
 
+#define BRIGHTNESS_MAX 128
+
 void scene::setup() {};
 void scene::update() {};
 
-void scene::setBrightness( float brightness ) {
+void scene::setFrameBrightness( float brightness ) {
     for(int i = 0; i < 10; i++){
         for(int j=0; j < 10;j++){
             pixelMatrix[i][j].setBrightness( brightness );
@@ -30,16 +32,16 @@ void sceneIntro::setup(){
 
 void sceneIntro::update(){
     
-    pulse.update(1.0f / 240);
+    pulse.update(1.0f / FPS);
     
     int k = 0;
     int setMatrix[] = {
         0,0,0,0,0,0,0,0,0,0,
         0,0,0,0,0,0,0,0,0,0,
         0,0,0,0,0,0,0,0,0,0,
-        0,0,0,0,0,0,0,0,0,0,
+        0,0,0,1,0,1,1,0,0,0,
         0,0,0,0,1,1,0,0,0,0,
-        0,0,0,0,1,1,0,0,0,0,
+        0,0,0,1,0,0,1,0,0,0,
         0,0,0,0,0,0,0,0,0,0,
         0,0,0,0,0,0,0,0,0,0,
         0,0,0,0,0,0,0,0,0,0,
@@ -61,6 +63,10 @@ void sceneIntro::update(){
 
 
 void sceneMirror::setup(){
+    
+    pulse.animateTo(128);
+    pulse.setRepeatType(LOOP_BACK_AND_FORTH);
+    pulse.setCurve(EASE_IN_EASE_OUT);
 
     shiftTimer.set(500,true);
 
@@ -86,7 +92,7 @@ void sceneMirror::setup(){
 
 void sceneMirror::update(){
     
-    // shift.update(1.0f/100);
+    pulse.update(1.0f / FPS);
     
     int k = 0;
     int setMatrix[] = {
@@ -106,8 +112,6 @@ void sceneMirror::update(){
     
 //    if( shiftTimer.check() ) {
 //        
-//        generateMirrorFrame();
-//        
 //        for(int i = 0; i < shiftIndex ;i++) {
 //            shiftMatrix(pixelMatrix,1);
 //        }
@@ -120,7 +124,7 @@ void sceneMirror::update(){
 //        personBrightness = ofMap(person.width, pBrightnessMin, pBrightnessMax, 0,BRIGHTNESS_MAX,true);
 //    }
 //    
-//    setMirrorFrameBrightness(personBrightness);
+    setFrameBrightness(pulse.val());
     
     for(int i = 0; i < 10; i++){
         for(int j=0; j < 10;j++){

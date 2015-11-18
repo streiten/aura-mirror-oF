@@ -13,12 +13,19 @@
 #include "utils.h"
 #include "ofxAnimatableFloat.h"
 
+#ifdef __arm__
+#define FPS 10
+#else
+#define FPS 240
+#endif
+
 class scene {
 
     ofxAnimatableFloat fader;
 
 public:
     
+    ofxAnimatableFloat pulse;
     ofColor pixelMatrix[10][10];
     
     //void start();
@@ -31,7 +38,7 @@ public:
     //bool isChangeing();
     //bool isRunning();
     
-    void setBrightness(float brightness);
+    void setFrameBrightness(float brightness);
     
     scene(){};
     ~scene(){}
@@ -43,7 +50,7 @@ public:
 
 class sceneIntro : public scene {
     
-   ofxAnimatableFloat pulse;
+//   ofxAnimatableFloat pulse;
     
 public:
 

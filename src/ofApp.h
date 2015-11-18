@@ -15,8 +15,6 @@
     #include "ofxCvPiCam.h"
 #endif
 
-
-
 class ofApp : public ofBaseApp , public SSHKeyListener{
     
 public:
