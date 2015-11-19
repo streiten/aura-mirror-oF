@@ -47,7 +47,9 @@ void ofApp::setup(){
     
     // Cam & Facedetection
     finder.setPreset(ObjectFinder::Fast);
-    finder.getTracker().setSmoothingRate(0.05);
+    finder.setFindBiggestObject(true);
+    finder.getTracker().setSmoothingRate(0.3);
+    
 
     #ifdef __arm__
         finder.setup("haarcascade_frontalface_alt2.xml");
@@ -64,14 +66,13 @@ void ofApp::setup(){
     personPresentLastFrame = false;
     personPresentChanged = false;
     
-    sceneAlpha = 0;
 
+    aFactor = 0;
+    aFactorLast = 0;
+    
     sceneBlend.animateTo(1);
     sceneBlend.setCurve(EASE_IN_EASE_OUT);
     sceneBlend.setDuration(1);
-    
-    // sceneBlend.setRepeatType(LOOP_BACK_AND_FORTH);
-
     
     SM.setup();
     
@@ -94,11 +95,17 @@ void ofApp::update(){
         }
     #endif
     
-    
     if(finder.size() > 0) {
         // Person present watchdog
         presentTimer.reset();
         personPresent = true;
+        
+        ofRectangle object = finder.getObjectSmoothed(0);
+        // object.width
+        
+        aFactor = aFactorLast - object.width;
+        ofDrawBitmapStringHighlight(ofToString(aFactor), 210, 120);
+        aFactorLast = object.width;
     }
     
     // prevent factedetection fails to invoke scenechanges
@@ -109,6 +116,11 @@ void ofApp::update(){
     if( personPresentLastFrame != personPresent ) {
         cout << "Person present changed!" << endl ;
         personPresentChanged = true;
+        
+        if(personPresent){
+            SM.mirror.setRandomImage();
+        }
+        
     } else {
         personPresentChanged = false;
     }
@@ -119,7 +131,6 @@ void ofApp::update(){
     if(personPresent) {
         sceneBlend.animateTo(1);
         // sceneAlpha = 0.80f * sceneAlpha + 0.20 * 1.0;
-        // SM.mirror.setRandomImage();
         // SM.currentScene = 1;
     } else {
         sceneBlend.animateTo(0);
@@ -140,6 +151,7 @@ void ofApp::update(){
 void ofApp::draw(){
     
     sendFrameToMirror(SM.pixelMatrixBlended);
+    ofDrawBitmapStringHighlight(ofToString((int) ofGetFrameRate()) + "fps", 10, 20);
 
     if(debug){
         
@@ -156,25 +168,24 @@ void ofApp::draw(){
             ofRectangle object = finder.getObjectSmoothed(i);
             String s = "Tracker width:" + ofToString(object.height) + " X: " + ofToString(object.x) + " Y: " +  ofToString(object.y);
             ofDrawBitmapStringHighlight(s , 210, 70);
+            ofDrawBitmapStringHighlight(ofToString(finder.getLabel(0)), 210, 100);
+
+
         }
         
         ofDrawRectangle(0, sceneBlend.val() * ofGetHeight() , ofGetWidth(), 2);
         
         drawLEDMatrix(SM.pixelMatrixBlended);
-        if(SM.currentScene == 1) {
-            SM.mirror.getCurrentImage().draw(ofGetWidth()-100,0,100,100);
-        }
         
-        ofDrawBitmapStringHighlight(ofToString((int) ofGetFrameRate()) + "fps", 10, 20);
-//        ofDrawBitmapStringHighlight(ofToString(finder.size()), 10, 40);
+        SM.mirror.getCurrentImage().draw(ofGetWidth()-100,0,100,100);
         
         if(personPresent){
             ofDrawBitmapStringHighlight("Person present!",210, 30);
         }
         
-//        ofDrawBitmapStringHighlight("Calculated Brightness: "+ ofToString(personBrightness), 210, 50);
+        ofDrawBitmapStringHighlight("Aural Factor:" + ofToString(aFactor), 210, 50);
         ofDrawBitmapStringHighlight(ofToString(sceneBlend.val()), 210, 90);
-        
+
         gui.draw();
 
     }

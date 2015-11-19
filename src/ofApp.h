@@ -123,9 +123,12 @@ public:
     float personBrightness;
     auraTimer presentTimer;
     
+    // THE AURAL FACTOR
+    float aFactor;
+    float aFactorLast;
+    
     // SCENES
     sceneManager SM;
-    float sceneAlpha;
     ofxAnimatableFloat sceneBlend;
 
 };
