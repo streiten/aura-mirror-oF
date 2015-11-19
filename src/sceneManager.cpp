@@ -17,6 +17,8 @@ void sceneManager::setup(){
     intro.setup();
     mirror.setup();
     
+    sceneChange = false;
+    
     scenes.push_back(&intro);
     scenes.push_back(&mirror);
     

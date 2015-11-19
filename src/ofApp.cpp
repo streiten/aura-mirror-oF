@@ -14,7 +14,7 @@ using namespace cv;
 #ifdef __arm__
 #define FPS 10
 #else
-#define FPS 60
+#define FPS 240
 #endif
 
 
@@ -101,40 +101,58 @@ void ofApp::update(){
         personPresent = true;
         
         ofRectangle object = finder.getObjectSmoothed(0);
-        // object.width
         
         aFactor = aFactorLast - object.width;
         ofDrawBitmapStringHighlight(ofToString(aFactor), 210, 120);
         aFactorLast = object.width;
     }
     
-    // prevent factedetection fails to invoke scenechanges
+    // prevent factedetection fails to be treated as person leaving
     if(presentTimer.check()) {
         personPresent = false;
     }
     
+    sceneBlend.update( 1.0f / FPS );
+
     if( personPresentLastFrame != personPresent ) {
         cout << "Person present changed!" << endl ;
         personPresentChanged = true;
+        
+        // person found
         if(personPresent){
-            SM.mirror.setRandomImage();
+            sceneBlend.animateTo(1);
+        // person lost
+        } else {
+            sceneBlend.animateTo(0);
         }
+        
     } else {
         personPresentChanged = false;
     }
     personPresentLastFrame = personPresent;
-    
-    sceneBlend.update(1.0f / 10);
-    
-    if(personPresent) {
-        sceneBlend.animateTo(1);
-        // sceneAlpha = 0.80f * sceneAlpha + 0.20 * 1.0;
-        // SM.currentScene = 1;
-    } else {
-        sceneBlend.animateTo(0);
-        //  SM.currentScene = 0;
-        //sceneAlpha = 0.80f * sceneAlpha + 0.20 * 0;
-    }
+
+        // just came to idle mode
+        if((sceneBlend.val() < 0.1)) {
+            
+            if(SM.sceneChange)
+            {
+                SM.sceneChange = false;
+                SM.mirror.setRandomImage();
+                cout << "Scene Idle entered!" << endl;
+            }
+        
+        // just came to mirror mode
+        } else if ((sceneBlend.val() > 0.9) ) {
+           
+            if(SM.sceneChange)
+            {
+                SM.sceneChange = false;
+                cout << "Scene Mirror entered!" << endl;
+            }
+
+        } else {
+            SM.sceneChange = true;
+        }
 
     SM.scenes[0]->update();
     SM.scenes[1]->update();
@@ -161,7 +179,6 @@ void ofApp::draw(){
         cam.draw(0, 0);
 #endif
         finder.draw();
-        
         for(int i = 0; i < finder.size(); i++) {
             ofRectangle object = finder.getObjectSmoothed(i);
             String s = "Tracker width:" + ofToString(object.height) + " X: " + ofToString(object.x) + " Y: " +  ofToString(object.y);
@@ -179,13 +196,11 @@ void ofApp::draw(){
             ofDrawBitmapStringHighlight("Person present!",210, 30);
         }
         
-//        ofDrawBitmapStringHighlight("Aural Factor:" + ofToString(aFactor), 210, 50);
+//      ofDrawBitmapStringHighlight("Aural Factor:" + ofToString(aFactor), 210, 50);
         ofDrawBitmapStringHighlight(ofToString(sceneBlend.val()), 210, 90);
 
         gui.draw();
-
     }
-
 }
 
 

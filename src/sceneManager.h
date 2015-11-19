@@ -20,8 +20,10 @@ public:
     sceneMirror mirror;
     
     ofColor pixelMatrixBlended[10][10];
-    
+        
     int currentScene;
+    int sceneChange;
+    
     void setup();
     void update();
     

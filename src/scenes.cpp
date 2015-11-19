@@ -96,7 +96,7 @@ void sceneMirror::setup(){
         images[i].loadImage(dir.getPath(i));
     }
     
-    currentImage = ofRandom(floor(dir.size()+1));
+    setRandomImage();
 
 };
 
@@ -169,7 +169,6 @@ void sceneMirror::shiftMatrix(int dir) {
         default:
             break;
     }
-    
 }
 
 void sceneMirror::setRandomImage(){
