@@ -123,10 +123,10 @@ public:
     float personBrightness;
     auraTimer presentTimer;
     
-    ofxAnimatableFloat sceneTransitionAnim;
-    
     // SCENES
     sceneManager SM;
+    float sceneAlpha;
+    ofxAnimatableFloat sceneBlend;
 
 };
 

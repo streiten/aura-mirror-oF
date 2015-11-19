@@ -11,6 +11,13 @@
 
 #define BRIGHTNESS_MAX 128
 
+#ifdef __arm__
+#define FPS 10
+#else
+#define FPS 60
+#endif
+
+
 void scene::setup() {};
 void scene::update() {};
 
@@ -88,7 +95,8 @@ void sceneMirror::setup(){
     for(int i = 0; i < (int)dir.size(); i++){
         images[i].loadImage(dir.getPath(i));
     }
-    currentImage = 0;
+    
+    currentImage = ofRandom(floor(dir.size()+1));
 
 };
 

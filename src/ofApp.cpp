@@ -12,10 +12,11 @@ using namespace cv;
 #define BRIGHTNESS_MAX 128
 
 #ifdef __arm__
-    #define FPS 10
+#define FPS 10
 #else
-    #define FPS 240
+#define FPS 60
 #endif
+
 
 // animations shift / scale / rotate / fade / brightness
 // parameters: face size / closeup - general movement
@@ -27,7 +28,6 @@ void ofApp::setup(){
     
     // General
     ofBackground(0, 0, 0);
-    //ofSetVerticalSync(true);
     ofSetFrameRate(60);
     
     consoleListener.setup(this);
@@ -39,9 +39,9 @@ void ofApp::setup(){
     vector <ofSerialDeviceInfo> deviceList = serial.getDeviceList();
     int baud = 115200;
     #ifdef __arm__
-        serial.setup("/dev/ttyACM0", baud); //open the first device
+        serial.setup("/dev/ttyACM0", baud);
     #else 
-        serial.setup("/dev/tty.usbmodem1216041", baud); //open the first device
+        serial.setup("/dev/tty.usbmodem1216041", baud);
     #endif
     memset(bytesReadString, 0, 256);
     
@@ -51,7 +51,7 @@ void ofApp::setup(){
 
     #ifdef __arm__
         finder.setup("haarcascade_frontalface_alt2.xml");
-        cam.setup(640,480,false);//setup camera (w,h,color = true,gray = false);
+        cam.setup(640,480,false);
         cam.setFlips(false,true);
     #else
         cam.videoSettings();
@@ -62,17 +62,20 @@ void ofApp::setup(){
     presentTimer.set(PRESENT_DELAY,false);
     personPresent = false;
     personPresentLastFrame = false;
-    
     personPresentChanged = false;
-//    personBrightness = BRIGHTNESS_MAX;
     
+    sceneAlpha = 0;
+
+    sceneBlend.animateTo(1);
+    sceneBlend.setCurve(EASE_IN_EASE_OUT);
+    sceneBlend.setDuration(1);
+    
+    // sceneBlend.setRepeatType(LOOP_BACK_AND_FORTH);
+
     
     SM.setup();
-        
-    // sceneTransitionAnim.setCurve(EASE_IN_EASE_OUT);
-    // sceneTransitionAnim.setRepeatType(LOOP_BACK_AND_FORTH_ONCE);
     
-    // The Gui
+    // the Gui
     setupGui();
 }
 
@@ -106,30 +109,29 @@ void ofApp::update(){
     if( personPresentLastFrame != personPresent ) {
         cout << "Person present changed!" << endl ;
         personPresentChanged = true;
-        if(!sceneTransitionAnim.isAnimating()) {
-            sceneTransitionAnim.reset();
-            sceneTransitionAnim.animateTo(1);
-            
-            SM.mirror.setRandomImage();
-        
-        };
     } else {
         personPresentChanged = false;
     }
     personPresentLastFrame = personPresent;
     
-    sceneTransitionAnim.update(1.0f/FPS);
+    sceneBlend.update(1.0f / 10);
     
-    if(sceneTransitionAnim.hasFinishedAnimating()){
-        if(personPresent) {
-            SM.currentScene = 1;
-        } else {
-            SM.currentScene = 0;
-        }
+    if(personPresent) {
+        sceneBlend.animateTo(1);
+        // sceneAlpha = 0.80f * sceneAlpha + 0.20 * 1.0;
+        // SM.mirror.setRandomImage();
+        // SM.currentScene = 1;
+    } else {
+        sceneBlend.animateTo(0);
+        //  SM.currentScene = 0;
+        //sceneAlpha = 0.80f * sceneAlpha + 0.20 * 0;
     }
+
+    SM.scenes[0]->update();
+    SM.scenes[1]->update();
     
-    SM.scenes[SM.currentScene]->update();
-    
+    SM.getSceneBlend((float) sceneBlend.val() ,SM.mirror.pixelMatrix, SM.intro.pixelMatrix);
+
     // unsigned char * pixels = myImg.getPixels();
 
 }
@@ -137,7 +139,7 @@ void ofApp::update(){
 //--------------------------------------------------------------
 void ofApp::draw(){
     
-    sendFrameToMirror(SM.scenes[SM.currentScene]->pixelMatrix);
+    sendFrameToMirror(SM.pixelMatrixBlended);
 
     if(debug){
         
@@ -156,9 +158,9 @@ void ofApp::draw(){
             ofDrawBitmapStringHighlight(s , 210, 70);
         }
         
-        ofDrawRectangle(0, sceneTransitionAnim.val() * ofGetHeight() , ofGetWidth(), 2);
+        ofDrawRectangle(0, sceneBlend.val() * ofGetHeight() , ofGetWidth(), 2);
         
-        drawLEDMatrix(SM.scenes[SM.currentScene]->pixelMatrix);
+        drawLEDMatrix(SM.pixelMatrixBlended);
         if(SM.currentScene == 1) {
             SM.mirror.getCurrentImage().draw(ofGetWidth()-100,0,100,100);
         }
@@ -171,7 +173,7 @@ void ofApp::draw(){
         }
         
 //        ofDrawBitmapStringHighlight("Calculated Brightness: "+ ofToString(personBrightness), 210, 50);
-        ofDrawBitmapStringHighlight(ofToString(sceneTransitionAnim.val()), 210, 90);
+        ofDrawBitmapStringHighlight(ofToString(sceneBlend.val()), 210, 90);
         
         gui.draw();
 
