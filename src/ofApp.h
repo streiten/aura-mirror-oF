@@ -86,7 +86,6 @@ public:
     string PiCamExposureMeteringModes[5];
     string PiCamImageFXLabels[24];
 
-    
     int activeSettingParam;
     
     void generateMirrorTestFrame();

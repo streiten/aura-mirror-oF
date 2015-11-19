@@ -116,11 +116,9 @@ void ofApp::update(){
     if( personPresentLastFrame != personPresent ) {
         cout << "Person present changed!" << endl ;
         personPresentChanged = true;
-        
         if(personPresent){
             SM.mirror.setRandomImage();
         }
-        
     } else {
         personPresentChanged = false;
     }
@@ -169,8 +167,6 @@ void ofApp::draw(){
             String s = "Tracker width:" + ofToString(object.height) + " X: " + ofToString(object.x) + " Y: " +  ofToString(object.y);
             ofDrawBitmapStringHighlight(s , 210, 70);
             ofDrawBitmapStringHighlight(ofToString(finder.getLabel(0)), 210, 100);
-
-
         }
         
         ofDrawRectangle(0, sceneBlend.val() * ofGetHeight() , ofGetWidth(), 2);
@@ -183,7 +179,7 @@ void ofApp::draw(){
             ofDrawBitmapStringHighlight("Person present!",210, 30);
         }
         
-        ofDrawBitmapStringHighlight("Aural Factor:" + ofToString(aFactor), 210, 50);
+//        ofDrawBitmapStringHighlight("Aural Factor:" + ofToString(aFactor), 210, 50);
         ofDrawBitmapStringHighlight(ofToString(sceneBlend.val()), 210, 90);
 
         gui.draw();
@@ -458,12 +454,38 @@ void ofApp::onCharacterReceived(SSHKeyListenerEventData& e)
 void ofApp::keyPressed(int key){
     
     // Brightness Min & Max
-    if(key == 'q') { activeSettingParam = 1 ;}
-    if(key == 'w') { activeSettingParam = 2 ;}
-    
-    // PiCam contrast & brightness
-    if(key == 'b') { activeSettingParam = 3 ;}
-    if(key == 'c') { activeSettingParam = 4 ;}
+    if(key == 'q') {
+        activeSettingParam = 1;
+        cout << "Setting now" << endl;
+    }
+    if(key == 'w') {
+        activeSettingParam = 2;
+        cout << "Setting now" << endl;
+    }
+    if(key == 'b') {
+        activeSettingParam = 3;
+        cout << "Setting brightness now" << endl;
+    }
+    if(key == 'c') {
+        activeSettingParam = 4;
+        cout << "Setting contrast now" << endl;
+    }
+    if(key == 'x') {
+        activeSettingParam = 5;
+        cout << "Setting X now" << endl;
+    }
+    if(key == 'y') {
+        activeSettingParam = 6;
+        cout << "Setting Y now" << endl;
+    }
+    if(key == 'r') {
+        activeSettingParam = 7;
+        cout << "Setting ROI Width now" << endl;
+    }
+    if(key == 'R') {
+        activeSettingParam = 8;
+        cout << "Setting ROI Height now" << endl;
+    }
     
     // Save and Load Settings
     if(key == 's'){
@@ -512,6 +534,31 @@ void ofApp::keyPressed(int key){
                 cout << "pPiCamContrast: " << pPiCamContrast << endl;
             }
         }
+        if(activeSettingParam == 5) {
+            if(pPiCamRoiX < 100) {
+                pPiCamRoiX += 0.1;
+                cout << "pPiCamRoiX: " << pPiCamRoiX << endl;
+            }
+        }
+        if(activeSettingParam == 6) {
+            if(pPiCamRoiY < 100) {
+                pPiCamRoiY += 0.1;
+                cout << "pPiCamRoiY: " << pPiCamRoiY << endl;
+            }
+        }
+        
+        if(activeSettingParam == 7) {
+            if(pPiCamRoiW < 100) {
+                pPiCamRoiW += 0.1;
+                cout << "pPiCamRoiW: " << pPiCamRoiW << endl;
+            }
+        }
+        if(activeSettingParam == 8) {
+            if(pPiCamRoiH < 100) {
+                pPiCamRoiH += 0.1;
+                cout << "pPiCamRoiH: " << pPiCamRoiH << endl;
+            }
+        }
     }
     
     if(key == '-') {
@@ -530,19 +577,44 @@ void ofApp::keyPressed(int key){
                 
             }
         }
-
+        
         if(activeSettingParam == 3) {
             if(pPiCamBrightness > 0) {
                 pPiCamBrightness -= 5;
                 cout << "pPiCamBrightness: " << pPiCamBrightness << endl;
-
+                
             }
         }
         if(activeSettingParam == 4) {
             if(pPiCamContrast > 0) {
                 pPiCamContrast -= 5;
                 cout << "pPiCamContrast: " << pPiCamContrast << endl;
-
+                
+            }
+        }
+        if(activeSettingParam == 5) {
+            if(pPiCamRoiX < 100) {
+                pPiCamRoiX -= 0.1;
+                cout << "pPiCamRoiX: " << pPiCamRoiX << endl;
+            }
+        }
+        if(activeSettingParam == 6) {
+            if(pPiCamRoiY < 100) {
+                pPiCamRoiY -= 0.1;
+                cout << "pPiCamRoiY: " << pPiCamRoiY << endl;
+            }
+        }
+        
+        if(activeSettingParam == 7) {
+            if(pPiCamRoiW < 100) {
+                pPiCamRoiW -= 0.1;
+                cout << "pPiCamRoiW: " << pPiCamRoiW << endl;
+            }
+        }
+        if(activeSettingParam == 8) {
+            if(pPiCamRoiH < 100) {
+                pPiCamRoiH -= 0.1;
+                cout << "pPiCamRoiH: " << pPiCamRoiH << endl;
             }
         }
     }
