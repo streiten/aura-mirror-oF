@@ -14,7 +14,7 @@ using namespace cv;
 #ifdef __arm__
 #define FPS 10
 #else
-#define FPS 240
+#define FPS 60
 #endif
 
 
@@ -72,7 +72,7 @@ void ofApp::setup(){
     
     // sceneBlend.animateTo(0);
     sceneBlend.setCurve(EASE_IN_EASE_OUT);
-    sceneBlend.setDuration(1);
+    sceneBlend.setDuration(3);
     
     SM.setup();
     
