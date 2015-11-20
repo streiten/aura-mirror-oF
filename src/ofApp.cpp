@@ -70,7 +70,7 @@ void ofApp::setup(){
     aFactor = 0;
     aFactorLast = 0;
     
-    sceneBlend.animateTo(1);
+    // sceneBlend.animateTo(0);
     sceneBlend.setCurve(EASE_IN_EASE_OUT);
     sceneBlend.setDuration(1);
     
@@ -183,7 +183,7 @@ void ofApp::draw(){
             ofRectangle object = finder.getObjectSmoothed(i);
             String s = "Tracker width:" + ofToString(object.height) + " X: " + ofToString(object.x) + " Y: " +  ofToString(object.y);
             ofDrawBitmapStringHighlight(s , 210, 70);
-            ofDrawBitmapStringHighlight(ofToString(finder.getLabel(0)), 210, 100);
+            // ofDrawBitmapStringHighlight(ofToString(finder.getLabel(0)), 210, 100);
         }
         
         ofDrawRectangle(0, sceneBlend.val() * ofGetHeight() , ofGetWidth(), 2);
@@ -197,7 +197,7 @@ void ofApp::draw(){
         }
         
 //      ofDrawBitmapStringHighlight("Aural Factor:" + ofToString(aFactor), 210, 50);
-        ofDrawBitmapStringHighlight(ofToString(sceneBlend.val()), 210, 90);
+        //ofDrawBitmapStringHighlight(ofToString(sceneBlend.val()), 210, 90);
 
         gui.draw();
     }
