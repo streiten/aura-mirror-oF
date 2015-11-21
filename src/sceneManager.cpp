@@ -22,7 +22,7 @@ void sceneManager::setup(){
     scenes.push_back(&intro);
     scenes.push_back(&mirror);
     
-    alwaysOn = true;
+    alwaysOn = false;
     
 };
 

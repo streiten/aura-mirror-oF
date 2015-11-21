@@ -72,10 +72,10 @@ void sceneIntro::update(){
 
 void sceneMirror::setup(){
     
-//    pulse.animateTo(BRIGHTNESS_MAX);
-//    pulse.setRepeatType(LOOP_BACK_AND_FORTH);
-//    pulse.setCurve(EASE_IN_EASE_OUT);
-//    pulse.setDuration(10);
+    pulse.animateFromTo(92,BRIGHTNESS_MAX);
+    pulse.setRepeatType(LOOP_BACK_AND_FORTH);
+    pulse.setCurve(EASE_IN_EASE_OUT);
+    pulse.setDuration(10);
 
     shiftTimer.set(500,true);
 
@@ -103,7 +103,7 @@ void sceneMirror::setup(){
 
 void sceneMirror::update(){
     
-    // pulse.update(1.0f / FPS);
+    pulse.update(1.0f / FPS);
     
     int k = 0;
     int setMatrix[] = {
@@ -136,7 +136,7 @@ void sceneMirror::update(){
 //        personBrightness = ofMap(person.width, pBrightnessMin, pBrightnessMax, 0,BRIGHTNESS_MAX,true);
 //    }
 //    
-//    setFrameBrightness(pulse.val());
+    setFrameBrightness(pulse.val());
     
     for(int i = 0; i < 10; i++){
         for(int j=0; j < 10;j++){
