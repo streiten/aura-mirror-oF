@@ -113,7 +113,8 @@ void ofApp::update(){
     }
     
     sceneBlend.update( 1.0f / FPS );
-
+    
+    // Person present
     if( personPresentLastFrame != personPresent ) {
         cout << "Person present changed!" << endl ;
         personPresentChanged = true;
@@ -131,18 +132,22 @@ void ofApp::update(){
     }
     personPresentLastFrame = personPresent;
 
+    // State changes
         // just came to idle mode
-        if((sceneBlend.val() < 0.1)) {
+        if((sceneBlend.val() == 0)) {
             
             if(SM.sceneChange)
             {
                 SM.sceneChange = false;
                 SM.mirror.setRandomImage();
+                SM.mirror.generateMatrixFromImage();
+
+
                 cout << "Scene Idle entered!" << endl;
             }
         
         // just came to mirror mode
-        } else if ((sceneBlend.val() > 0.9) ) {
+        } else if ((sceneBlend.val() == 1) ) {
            
             if(SM.sceneChange)
             {
@@ -468,7 +473,17 @@ void ofApp::onCharacterReceived(SSHKeyListenerEventData& e)
 //--------------------------------------------------------------
 void ofApp::keyPressed(int key){
     
-    // Brightness Min & Max
+
+    if(key == '*') {
+        if(SM.alwaysOn) {
+            SM.alwaysOn = false;
+            cout << "Always on OFF now!" << endl;
+        } else {
+            SM.alwaysOn = true;
+            cout << "Always on ON now!" << endl;
+        }
+    }
+    
     if(key == 'q') {
         activeSettingParam = 1;
         cout << "Setting now" << endl;

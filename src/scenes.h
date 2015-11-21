@@ -66,10 +66,11 @@ public:
     void update();
     void setRandomImage();
     ofImage getCurrentImage();
+    void generateMatrixFromImage();
+
     
 protected:
-    void shiftMatrix(int dir);
-    void generateMatrixFromImage();
+    void shiftMatrix(ofColor * pixelMatrix, int dir);
 };
 
 

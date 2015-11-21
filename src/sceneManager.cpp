@@ -22,6 +22,8 @@ void sceneManager::setup(){
     scenes.push_back(&intro);
     scenes.push_back(&mirror);
     
+    alwaysOn = true;
+    
 };
 
 void sceneManager::update(){
@@ -32,7 +34,14 @@ void sceneManager::getSceneBlend(float crossfade, ofColor A[][10], ofColor B[][1
     
     for(int i = 0; i < 10; i++){
         for(int j=0; j < 10;j++){
-            pixelMatrixBlended[i][j] = A[i][j].lerp(B[i][j],1 - crossfade);
+            
+            if(alwaysOn) {
+                pixelMatrixBlended[i][j] = A[i][j];
+
+            } else {
+                pixelMatrixBlended[i][j] = A[i][j].lerp(B[i][j],1 - crossfade);
+
+            }
         }
     }
 }

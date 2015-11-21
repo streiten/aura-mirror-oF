@@ -77,7 +77,7 @@ void sceneMirror::setup(){
 //    pulse.setCurve(EASE_IN_EASE_OUT);
 //    pulse.setDuration(10);
 
-    // shiftTimer.set(500,true);
+    shiftTimer.set(500,true);
 
     // ofEnableAlphaBlending();
     // ofDisableAntiAliasing();
@@ -120,6 +120,7 @@ void sceneMirror::update(){
     };
     
     generateMatrixFromImage();
+
     
 //    if( shiftTimer.check() ) {
 //        
@@ -148,7 +149,7 @@ void sceneMirror::update(){
     
 };
 
-void sceneMirror::shiftMatrix(int dir) {
+void sceneMirror::shiftMatrix(ofColor * pixelMatrix, int dir) {
     
     ofColor line_buffer[10];
     
