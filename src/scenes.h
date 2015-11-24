@@ -25,7 +25,6 @@ public:
     virtual void setup();
     virtual void update();
     
-    
     //void start();
     //void stop();
     //bool isChangeing();

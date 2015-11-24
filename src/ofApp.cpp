@@ -291,7 +291,7 @@ void ofApp::setupGui (){
     //    paramsGroup1.add(pMultiplier.set("Multiply", 1, 1, 50));
     //    paramsGroup1.add(pDivider.set("Divide", 1, 1, 10));
     
-    paramsGroup1.add(pBrightness.set("Brightness", 128, 0, 255));
+    paramsGroup1.add(pBrightness.set("Brightness", 128, 10, 255));
     
     pBrightness.addListener(this, &ofApp::pBrightnessChanged);
 
@@ -380,8 +380,7 @@ void ofApp::setupGui (){
 //--------------------------------------------------------------
 void ofApp::pBrightnessChanged(int &value){
     SM.globalBrightness = value;
-    
-    SM.mirror.pulse.animateTo(value);
+    SM.mirror.pulse.animateFromTo(value-10,value);
     SM.intro.pulse.animateTo(value);
 
     cout << "pBrightness Event Handler Bang: " << value  << endl;
@@ -677,7 +676,7 @@ void ofApp::keyPressed(int key){
             }
         }
         if(activeSettingParam == 9) {
-            if(pBrightness > 0) {
+            if(pBrightness > 10) {
                 pBrightness -= 5;
                 cout << "pBrightness: " << pBrightness << endl;
             }
