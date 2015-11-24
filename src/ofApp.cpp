@@ -24,14 +24,14 @@ using namespace cv;
 //--------------------------------------------------------------
 void ofApp::setup(){
     
-    debug = true;
-    
     // General
     ofBackground(0, 0, 0);
     ofSetFrameRate(60);
     
     consoleListener.setup(this);
     consoleListener.startThread(false, false);
+    
+    fpsOutTimer.set(1000,true);
     
     // Serial
     bSendSerialMessage = false;
@@ -55,10 +55,12 @@ void ofApp::setup(){
         finder.setup("haarcascade_frontalface_alt2.xml");
         cam.setup(640,480,false);
         cam.setFlips(false,true);
+        debug = false;
     #else
         cam.videoSettings();
         cam.setup(640,480);
         finder.setup("haarcascade_frontalface_default.xml");
+        debug = true;
     #endif
     
     presentTimer.set(PRESENT_DELAY,false);
@@ -100,16 +102,20 @@ void ofApp::update(){
         presentTimer.reset();
         personPresent = true;
         
-        ofRectangle object = finder.getObjectSmoothed(0);
+//        ofRectangle object = finder.getObjectSmoothed(0);
         
-        aFactor = aFactorLast - object.width;
-        ofDrawBitmapStringHighlight(ofToString(aFactor), 210, 120);
-        aFactorLast = object.width;
+//        aFactor = aFactorLast - object.width;
+//        ofDrawBitmapStringHighlight(ofToString(aFactor), 210, 120);
+//        aFactorLast = object.width;
     }
     
     // prevent factedetection fails to be treated as person leaving
     if(presentTimer.check()) {
         personPresent = false;
+    }
+    
+    if(fpsOutTimer.check()) {
+        cout << "FPS:" << ofGetFrameRate() << endl;
     }
     
     sceneBlend.update( 1.0f / FPS );
@@ -172,10 +178,10 @@ void ofApp::update(){
 void ofApp::draw(){
     
     sendFrameToMirror(SM.pixelMatrixBlended);
-    ofDrawBitmapStringHighlight(ofToString((int) ofGetFrameRate()) + "fps", 10, 20);
 
     if(debug){
-        
+        ofDrawBitmapStringHighlight(ofToString((int) ofGetFrameRate()) + "fps", 10, 20);
+
 #ifdef __arm__
         if(!frame.empty()) {
             drawMat(frame,0,0);
@@ -284,10 +290,11 @@ void ofApp::setupGui (){
     //    paramsGroup1.add(pColorB.set("B", 128, 0, 255 ));
     //    paramsGroup1.add(pMultiplier.set("Multiply", 1, 1, 50));
     //    paramsGroup1.add(pDivider.set("Divide", 1, 1, 10));
-    //    paramsGroup1.add(pBrightness.set("Brightness", 128, 0, 255));
     
-    paramsGroup1.add(pBrightnessMin.set("Brightness Min", 140, 0, 300));
-    paramsGroup1.add(pBrightnessMax.set("Brightness Max", 250, 140, 300));
+    paramsGroup1.add(pBrightness.set("Brightness", 128, 0, 255));
+    
+//    paramsGroup1.add(pBrightnessMin.set("Brightness Min", 140, 0, 300));
+//    paramsGroup1.add(pBrightnessMax.set("Brightness Max", 250, 140, 300));
     
     pPiCamBrightness.addListener(this, &ofApp::pPiCamBrightnessChanged);
     pPiCamContrast.addListener(this,&ofApp::pPiCamContrastChanged);

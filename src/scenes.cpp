@@ -9,7 +9,7 @@
 #include "scenes.h"
 #include "ofxAnimatable.h"
 
-#define BRIGHTNESS_MAX 128
+#define BRIGHTNESS_MAX 92
 
 #ifdef __arm__
 #define FPS 10
@@ -72,7 +72,7 @@ void sceneIntro::update(){
 
 void sceneMirror::setup(){
     
-    pulse.animateFromTo(92,BRIGHTNESS_MAX);
+    pulse.animateFromTo(68,BRIGHTNESS_MAX);
     pulse.setRepeatType(LOOP_BACK_AND_FORTH);
     pulse.setCurve(EASE_IN_EASE_OUT);
     pulse.setDuration(10);
