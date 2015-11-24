@@ -535,6 +535,10 @@ void ofApp::keyPressed(int key){
         activeSettingParam = 8;
         cout << "Setting ROI Height now" << endl;
     }
+    if(key == 'B') {
+        activeSettingParam = 9;
+        cout << "Setting Global Brightness now" << endl;
+    }
     
     // Save and Load Settings
     if(key == 's'){
@@ -608,6 +612,12 @@ void ofApp::keyPressed(int key){
                 cout << "pPiCamRoiH: " << pPiCamRoiH << endl;
             }
         }
+        if(activeSettingParam == 9) {
+            if(pBrightness < 255) {
+                pBrightness += 5;
+                cout << "pBrightness: " << pBrightness << endl;
+            }
+        }
     }
     
     if(key == '-') {
@@ -664,6 +674,12 @@ void ofApp::keyPressed(int key){
             if(pPiCamRoiH < 100) {
                 pPiCamRoiH -= 0.1;
                 cout << "pPiCamRoiH: " << pPiCamRoiH << endl;
+            }
+        }
+        if(activeSettingParam == 9) {
+            if(pBrightness > 0) {
+                pBrightness -= 5;
+                cout << "pBrightness: " << pBrightness << endl;
             }
         }
     }

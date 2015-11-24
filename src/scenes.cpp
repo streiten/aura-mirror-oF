@@ -75,7 +75,7 @@ void sceneMirror::setup(){
     pulse.animateFromTo(56,BRIGHTNESS_MAX);
     pulse.setRepeatType(LOOP_BACK_AND_FORTH);
     pulse.setCurve(EASE_IN_EASE_OUT);
-    pulse.setDuration(5);
+    pulse.setDuration(10);
 
     shiftTimer.set(500,true);
 
