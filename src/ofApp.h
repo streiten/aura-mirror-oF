@@ -51,6 +51,8 @@ public:
     ofParameter<int> pBrightnessMin;
     ofParameter<int> pBrightnessMax;
     ofParameter<int> pBrightness;
+    void pBrightnessChanged(int &value);
+
     
     ofParameter<int> pPiCamBrightness;
     ofParameter<int> pPiCamContrast;

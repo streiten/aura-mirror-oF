@@ -293,6 +293,8 @@ void ofApp::setupGui (){
     
     paramsGroup1.add(pBrightness.set("Brightness", 128, 0, 255));
     
+    pBrightness.addListener(this, &ofApp::pBrightnessChanged);
+
 //    paramsGroup1.add(pBrightnessMin.set("Brightness Min", 140, 0, 300));
 //    paramsGroup1.add(pBrightnessMax.set("Brightness Max", 250, 140, 300));
     
@@ -374,6 +376,16 @@ void ofApp::setupGui (){
     
 }
 
+
+//--------------------------------------------------------------
+void ofApp::pBrightnessChanged(int &value){
+    SM.globalBrightness = value;
+    
+    SM.mirror.pulse.animateTo(value);
+    SM.intro.pulse.animateTo(value);
+
+    cout << "pBrightness Event Handler Bang: " << value  << endl;
+}
 
 //--------------------------------------------------------------
 void ofApp::pPiCamBrightnessChanged(int & pPiCamBrightness){
