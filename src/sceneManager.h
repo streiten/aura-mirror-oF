@@ -30,7 +30,8 @@ public:
     void getSceneBlend(float crossfade, ofColor A[][10], ofColor B[][10]);
     
     // hacks
-    bool alwaysOn; 
+    bool alwaysOn;
+    int globalBrightness;
     
 };
 

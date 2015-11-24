@@ -9,7 +9,7 @@
 #include "scenes.h"
 #include "ofxAnimatable.h"
 
-#define BRIGHTNESS_MAX 128
+#define BRIGHTNESS_MAX 92
 
 #ifdef __arm__
 #define FPS 10

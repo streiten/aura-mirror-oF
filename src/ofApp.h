@@ -121,6 +121,7 @@ public:
     
     float personBrightness;
     auraTimer presentTimer;
+    auraTimer fpsOutTimer;
     
     // THE AURAL FACTOR
     float aFactor;
