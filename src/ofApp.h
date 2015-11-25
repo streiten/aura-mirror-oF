@@ -132,6 +132,9 @@ public:
     // SCENES
     sceneManager SM;
     ofxAnimatableFloat sceneBlend;
+    
+    // HACKS
+    bool sawSomeone;
 
 };
 

@@ -74,9 +74,11 @@ void ofApp::setup(){
     
     // sceneBlend.animateTo(0);
     sceneBlend.setCurve(EASE_IN_EASE_OUT);
-    sceneBlend.setDuration(3);
+    sceneBlend.setDuration(5);
     
     SM.setup();
+    
+    sawSomeone = false;
     
     // the Gui
     setupGui();
@@ -160,6 +162,7 @@ void ofApp::update(){
             if(SM.sceneChange)
             {
                 SM.sceneChange = false;
+                sawSomeone = true;
                 cout << "Scene Mirror entered!" << endl;
             }
 
@@ -168,7 +171,10 @@ void ofApp::update(){
         }
 
     SM.scenes[0]->update();
-    SM.scenes[1]->update();
+    
+    if(sawSomeone){
+        SM.scenes[1]->update();
+    }
     
     SM.getSceneBlend((float) sceneBlend.val() ,SM.mirror.pixelMatrix, SM.intro.pixelMatrix);
 
