@@ -170,7 +170,7 @@ void ofApp::update(){
 
     SM.scenes[0]->update();
     
-    if(sawSomeone){
+    if(sawSomeone){
         SM.scenes[1]->update();
     }
     
