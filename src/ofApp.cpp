@@ -135,9 +135,11 @@ void ofApp::update(){
             if(SM.sceneChange)
             {
                 SM.sceneChange = false;
-                SM.mirror.setRandomImage();
+                
+		if(!SM.alwaysOn){
+		SM.mirror.setRandomImage();
                 SM.mirror.generateMatrixFromImage();
-
+}
 
                 cout << "Scene Idle entered!" << endl;
             }
