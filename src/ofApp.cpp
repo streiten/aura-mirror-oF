@@ -438,6 +438,16 @@ void ofApp::keyPressed(int key){
         }
     }
     
+    if(key == 'd') {
+        if(debug) {
+            debug = false;
+        } else {
+            debug = true;
+        }
+        cout << "Toggle Debug!" << endl;
+    }
+    
+    
     if(key == 'q') {
         activeSettingParam = 1;
         cout << "Setting now" << endl;
