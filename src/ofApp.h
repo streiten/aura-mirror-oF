@@ -10,6 +10,7 @@
 #include "ConsoleListener.h"
 #include "sceneManager.h"
 #include "utils.h"
+#include "auraDisplay.h"
 
 #ifdef __arm__
     #include "ofxCvPiCam.h"
@@ -90,22 +91,9 @@ public:
 
     int activeSettingParam;
     
-    void generateMirrorTestFrame();
-    void drawLEDMatrix(ofColor pixelMatrix[][10]);
-    void sendFrameToMirror(ofColor pixelMatrix[][10]);
-                        
-    bool display_on = true;
+    // DISPLAY / LED MATRIX
+    auraDisplay ledDisplay;
     
-    // SERIAL
-    ofSerial    serial;
-    bool		bSendSerialMessage;			// a flag for sending serial
-    char		bytesRead[255];				// data from serial, we will be trying to read 255
-    char		bytesReadString[256];			// a string needs a null terminator, so we need 255 + 1 bytes
-    int			nBytesRead;					// how much did we read?
-    int			nTimesRead;					// how many times did we read?
-    
-    void sendCommandToMirror(unsigned char cmd);
-
     // CAM
     #ifdef __arm__
         ofxCvPiCam cam;

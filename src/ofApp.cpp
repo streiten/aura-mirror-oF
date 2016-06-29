@@ -17,7 +17,6 @@ using namespace cv;
 #define FPS 60
 #endif
 
-
 // animations shift / scale / rotate / fade / brightness
 // parameters: face size / closeup - general movement
 
@@ -33,17 +32,7 @@ void ofApp::setup(){
     
     fpsOutTimer.set(1000,true);
     
-    // Serial
-    bSendSerialMessage = false;
-    serial.listDevices();
-    vector <ofSerialDeviceInfo> deviceList = serial.getDeviceList();
-    int baud = 115200;
-    #ifdef __arm__
-        serial.setup("/dev/ttyACM0", baud);
-    #else 
-        serial.setup("/dev/tty.usbmodem1216041", baud);
-    #endif
-    memset(bytesReadString, 0, 256);
+    ledDisplay.setup();
     
     // Cam & Facedetection
     finder.setPreset(ObjectFinder::Fast);
@@ -68,7 +57,6 @@ void ofApp::setup(){
     personPresentLastFrame = false;
     personPresentChanged = false;
     
-
     aFactor = 0;
     aFactorLast = 0;
     
@@ -183,7 +171,7 @@ void ofApp::update(){
 //--------------------------------------------------------------
 void ofApp::draw(){
     
-    sendFrameToMirror(SM.pixelMatrixBlended);
+    ledDisplay.sendFrameToMirror(SM.pixelMatrixBlended);
 
     if(debug){
         ofDrawBitmapStringHighlight(ofToString((int) ofGetFrameRate()) + "fps", 10, 20);
@@ -205,7 +193,7 @@ void ofApp::draw(){
         
         ofDrawRectangle(0, sceneBlend.val() * ofGetHeight() , ofGetWidth(), 2);
         
-        drawLEDMatrix(SM.pixelMatrixBlended);
+        ledDisplay.drawLEDMatrix(SM.pixelMatrixBlended);
         
         SM.mirror.getCurrentImage().draw(ofGetWidth()-100,0,100,100);
         
@@ -221,66 +209,6 @@ void ofApp::draw(){
 }
 
 
-void ofApp::drawLEDMatrix(ofColor pixelMatrix[][10]) {
-    
-    for(int i = 0; i < 10; i++){
-        for(int j=0; j < 10;j++){
-            ofPushStyle();
-            ofFill();
-            ofSetColor(pixelMatrix[i][j]);
-            ofDrawRectangle(j * 20 + 10 , i * 20 + 10 ,10,10);
-            ofPopStyle();
-        }
-    }
-    
-}
-
-void ofApp::sendFrameToMirror(ofColor pixelMatrix[][10]) {
-    if(serial.isInitialized()){
-        unsigned char serialOutBuffer[301];
-        // Indicate DATA is coming
-        serialOutBuffer[0] = '$';
-        int p = 0;
-        for(int i = 0; i < 10; i++){
-            for(int j=0; j < 10;j++){
-                // push out the acutal data, r g b pixel per pixel
-                serialOutBuffer[3*p+1] = pixelMatrix[i][j].r;
-                serialOutBuffer[3*p+2] = pixelMatrix[i][j].g;
-                serialOutBuffer[3*p+3] = pixelMatrix[i][j].b;
-                p++;
-            }
-        }
-        serial.writeBytes(&serialOutBuffer[0],301);
-    }
-}
-
-void ofApp::sendCommandToMirror(unsigned char cmd) {
-    if(serial.isInitialized()){
-        
-        unsigned char cmdseq[] = {'@', cmd };
-        serial.writeBytes(&cmdseq[0],2);
-        cout << "Display toggle CMD sent!" << endl;
-        
-        nTimesRead = 0;
-        nBytesRead = 0;
-        int nRead  = 0;  // a temp variable to keep count per read
-        
-        unsigned char bytesReturned[255];
-        
-        memset(bytesReadString, 0, 256);
-        memset(bytesReturned, 0, 255);
-        
-        while( (nRead = serial.readBytes( bytesReturned, 255)) > 0){
-            nTimesRead++;
-            nBytesRead = nRead;
-        };
-        
-        memcpy(bytesReadString, bytesReturned, 255);
-        cout << "Display said:" << bytesReadString << endl;
-        bSendSerialMessage = false;
-    }
-    
-}
 
 
 void ofApp::setupGui (){
@@ -707,7 +635,6 @@ void ofApp::mouseDragged(int x, int y, int button){
 
 //--------------------------------------------------------------
 void ofApp::mousePressed(int x, int y, int button){
-    bSendSerialMessage = true;
 }
 
 
